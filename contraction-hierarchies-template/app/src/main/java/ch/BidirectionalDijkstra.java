@@ -32,19 +32,26 @@ public class BidirectionalDijkstra {
 
         
         while (!queueLeft.isEmpty() || !queueRight.isEmpty()){ // as long as neither queue is empty keep doing the following
-            Vertex minQLeft = queueLeft.poll(); // retrieves and deletes minimum leftQ
-            Vertex minQRight = queueRight.poll(); // retrieves and deletes minimum rightQ
+            Vertex minQLeft = queueLeft.peek(); // retrieves and deletes minimum leftQ
+            Vertex minQRight = queueRight.peek(); // retrieves and deletes minimum rightQ
 
-            Vertex i; // to keep a copy of the next vertex to visit;
+            PriorityQueue<Vertex> currentQueue; // to keep a copy of the next vertex to visit;
 
             if (!queueLeft.isEmpty() && (minQLeft.compareTo(minQRight)<0)){ //if leftQ not empty and min of leftQ < min of rightQ 
-                i = queueLeft.element(); // set i to left element
+                currentQueue = queueLeft; // set i to left element
             }
             else {
-                i = queueRight.element(); // set i to right element
+                currentQueue = queueRight; // set i to right element
             }
-            //TODO: Line ten onwards from the pseudo code
-            //if (i.equals(i))
+            
+            // retrieve the ID of the 
+            var elem = currentQueue.poll();
+            int u = elem.getVertexId();
+
+            
+
+
+
 
 
         }
