@@ -5,33 +5,63 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
-
-import org.checkerframework.checker.units.qual.s;
-
 // INPUT
 // first line: n = number of vertices , m = number of edges
-// n lines (nodes): int = number of the vertex, float = longitude, float = latitude 
+// n lines (vertices - nodes): int = number of the vertex, float = longitude, float = latitude 
 // m lines (edges): int = start (vertex), int = end (vertex), int = cost
 
 public class BidirectionalDijkstra {
 
     Set<Integer> settled = new HashSet<>();
-    Map<Integer, Float> dijkstraLeft = new HashMap<>();
-    Map<Integer, Float> dijkstraRight = new HashMap<>();
+    Map<Integer, Double> dijkstraLeft = new HashMap<>();
+    Map<Integer, Double> dijkstraRight = new HashMap<>();
     int d = Integer.MAX_VALUE;
 
     //TODO: check that this is correctly initiated to the right values of s and t
-    public BidirectionalDijkstra(){ 
-        dijkstraLeft.put(0, 0.0f);
-        dijkstraRight.put(0, 0.0f);
+    public BidirectionalDijkstra(int s, int t){ 
+        dijkstraLeft.put(s, 0.0);
+        dijkstraRight.put(t, 0.0);
         
-        PriorityQueue<PQElem> queueLeft = new PriorityQueue<>();
-        PriorityQueue<PQElem> queueRight = new PriorityQueue<>();
+        // initiate priority queues to keep next nodes to be visited - ordered from minor distance to higher (minor being the head)
+        PriorityQueue<Vertex> queueLeft = new PriorityQueue<>();
+        PriorityQueue<Vertex> queueRight = new PriorityQueue<>();
+
+        // initiate the queues with the start and target nodes (which have 0 distance to themselves)
+        queueLeft.add(new Vertex(s, 0.0));
+        queueRight.add(new Vertex(t, 0.0));
+
+        
+        while (!queueLeft.isEmpty() || !queueRight.isEmpty()){ // as long as neither queue is empty keep doing the following
+            Vertex minQLeft = queueLeft.peek();
+            Vertex minQRight = queueRight.peek();
+
+            Vertex i; // to keep a copy of the next vertex to visit;
+
+            if (!queueLeft.isEmpty() && (minQLeft.compareTo(minQRight)==-1)){ //if leftQ not empty and min of leftQ < min of rightQ 
+                i = queueLeft.element(); // set i to left element
+            }
+            else {
+                i = queueRight.element(); // set i to right element
+            }
+
+
+        }
+
+
+        // while (!pq.isEmpty()&& pq.peek().v != to) {
+        //     PQElem elem = pq.poll();
+        //     long u = elem.v;
+        //     if (visited.contains(u)) {
+        //         continue;
+        //     }
+        // }
+
+        
 
 
 
     }
-
-
-
+    public static void main(String[] args) {
+        
+    }
 }
