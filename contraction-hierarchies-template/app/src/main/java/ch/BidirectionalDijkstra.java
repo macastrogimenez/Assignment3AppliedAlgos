@@ -1,76 +1,82 @@
 package ch;
 
+
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.Set;
-// INPUT
-// first line: n = number of vertices , m = number of edges
-// n lines (vertices - nodes): int = number of the vertex, float = longitude, float = latitude 
-// m lines (edges): int = start (vertex), int = end (vertex), int = cost
 
 public class BidirectionalDijkstra {
+    
+    public double shortestPath(Graph g, long from, long to) {
+        //List<Map<Long, Double>> maps = new ArrayList<>(2);
+        HashMap<Long, Integer> dLeft = new HashMap<>();
+        HashMap<Long, Integer> dRight = new HashMap<>();
+        dLeft.put(from, 0);
+        dRight.put(to, 0);
+        //maps.add(dLeft);
+        //maps.add(dRight);
 
-    Set<Integer> settled = new HashSet<>();
-    Map<Integer, Double> dijkstraLeft = new HashMap<>();
-    Map<Integer, Double> dijkstraRight = new HashMap<>();
-    int d = Integer.MAX_VALUE;
-
-    //TODO: check that this is correctly initiated to the right values of s and t
-    public BidirectionalDijkstra(int s, int t){ 
-        dijkstraLeft.put(s, 0.0);
-        dijkstraRight.put(t, 0.0);
+        HashSet<Long> settled = new HashSet<>();
+        double distance = Integer.MAX_VALUE;
+        PriorityQueue<PQElem> pqLeft = new PriorityQueue<>();
+        PriorityQueue<PQElem> pqRight = new PriorityQueue<>();
+        pqLeft.add(new PQElem(0, from));
+        // start the right search from the target
+        pqRight.add(new PQElem(0, to));
+        //List<PriorityQueue<PQElem>> queues = new ArrayList<>(2);
+        //queues.add(pqLeft);
+        //queues.add(pqRight);
         
-        // initiate priority queues to keep next nodes to be visited - ordered from minor distance to higher (minor being the head)
-        PriorityQueue<Vertex> queueLeft = new PriorityQueue<>();
-        PriorityQueue<Vertex> queueRight = new PriorityQueue<>();
-
-        // initiate the queues with the start and target nodes (which have 0 distance to themselves)
-        queueLeft.add(new Vertex(s, 0.0));
-        queueRight.add(new Vertex(t, 0.0));
-
         
-        while (!queueLeft.isEmpty() || !queueRight.isEmpty()){ // as long as neither queue is empty keep doing the following
-            Vertex minQLeft = queueLeft.peek(); // retrieves and deletes minimum leftQ
-            Vertex minQRight = queueRight.peek(); // retrieves and deletes minimum rightQ
-
-            PriorityQueue<Vertex> currentQueue; // to keep a copy of the next vertex to visit;
-
-            if (!queueLeft.isEmpty() && (minQLeft.compareTo(minQRight)<0)){ //if leftQ not empty and min of leftQ < min of rightQ 
-                currentQueue = queueLeft; // set i to left element
+        while (!pqLeft.isEmpty() || !pqRight.isEmpty()) {
+            int side = 0; //0 is left 1 is right 
+            long u = 0;
+            // choose the queue with the smaller head; handle empty queues safely
+            PQElem leftTop = pqLeft.peek();
+            PQElem rightTop = pqRight.peek();
+            if (leftTop != null && (rightTop == null || leftTop.compareTo(rightTop) <= 0)) {
+                u = pqLeft.poll().v;
+                side = 0;
+            } else {
+                side = 1;
+                u = pqRight.poll().v;
             }
-            else {
-                currentQueue = queueRight; // set i to right element
+            if (settled.contains(u)) {
+                // u was settled by another instance
+                break;
             }
-            
-            // retrieve the ID of the 
-            var elem = currentQueue.poll();
-            int u = elem.getVertexId();
+            settled.add(u);
+             
+            for (Graph.Edge e : g.getNeighbours(u)) {
+                int w = e.weight;
+                Long v = e.to;
+                if (side == 0) { // left
+                    int du = dLeft.getOrDefault(u, Integer.MAX_VALUE);
+                    int dv = dLeft.getOrDefault(v, Integer.MAX_VALUE);
+                    if ((long) du + w < dv) {
+                        int newDist = du + w;
+                        dLeft.put(v, newDist);
+                        pqLeft.add(new PQElem(newDist, v));
+                    }
+                } else {
+                    int du = dRight.getOrDefault(u, Integer.MAX_VALUE);
+                    int dv = dRight.getOrDefault(v, Integer.MAX_VALUE);
+                    if ((long) du + w < dv) {
+                        int newDist = du + w;
+                        dRight.put(v, newDist);
+                        pqRight.add(new PQElem(newDist, v));
+                    }
+                }
 
-            
-
-
-
-
-
+                int dl = dLeft.getOrDefault(v, Integer.MAX_VALUE);
+                int dr = dRight.getOrDefault(v, Integer.MAX_VALUE);
+                if (dl < Integer.MAX_VALUE && dr < Integer.MAX_VALUE) {
+                    distance = Math.min(distance, (double) dl + (double) dr);
+                }
+            }
         }
-
-
-        // while (!pq.isEmpty()&& pq.peek().v != to) {
-        //     PQElem elem = pq.poll();
-        //     long u = elem.v;
-        //     if (visited.contains(u)) {
-        //         continue;
-        //     }
-        // }
-
-        
-
-
+        return distance;
 
     }
-    public static void main(String[] args) {
-        
-    }
+    
 }

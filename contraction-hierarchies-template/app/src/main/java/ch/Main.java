@@ -42,5 +42,7 @@ class Main {
         var graph = readGraph(sc);
         sc.close();
         System.out.println(graph.n + " " + graph.m);
+        BidirectionalDijkstra d = new BidirectionalDijkstra();
+        System.out.println(d.shortestPath(graph, 1, 15));
     }
 }
