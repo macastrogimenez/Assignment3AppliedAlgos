@@ -45,8 +45,7 @@ public class BidirectionalDijkstra {
                 // u was settled by another instance
                 break;
             }
-            settled.add(u);
-             
+            settled.add(u); 
             for (Graph.Edge e : g.getNeighbours(u)) {
                 int w = e.weight;
                 Long v = e.to;
