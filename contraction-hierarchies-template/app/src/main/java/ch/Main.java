@@ -41,10 +41,56 @@ class Main {
 
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
+        String algorithm = sc.nextLine();
+        int start = sc.nextInt();
+        int target = sc.nextInt();
+
         var graph = readGraph(sc);
         sc.close();
-        System.out.println(graph.n + " " + graph.m); //TODO: discuss the purpose of this
-        BidirectionalDijkstra d = new BidirectionalDijkstra();
-        System.out.println(d.shortestPath(graph, 1, 15));
+        if(algorithm.equals("BD")){
+            //System.out.println(graph.n + " " + graph.m); //TODO: discuss the purpose of this -> why does it double edges?
+            BidirectionalDijkstra d = new BidirectionalDijkstra();
+            System.out.println(d.distance(graph, start, target)); // Ula values: graph,1,15
+            // TODO: return result with time, relaxed edges and result
+        }
+        else{
+            // TODO: run the graph with regular dijkstra and return result with time, relaxed edges and result
+        }   
+        
+        
     }
 }
+
+// test input -> result should be 6
+// 7 10
+// 0 1.0 2.0
+// 1 2.0 3.0
+// 2 3.0 3.0
+// 3 4.0 2.0
+// 4 3.0 1.0
+// 5 2.0 1.0
+// 6 2.0 1.0
+// 0 1 3
+// 1 2 4
+// 2 3 4
+// 3 4 2
+// 4 5 3 
+// 5 0 1
+// 4 6 1 
+// 6 2 1
+// 5 6 2
+// 1 6 1
+
+//     1 ────────4──────── 2
+//    /│\                  │
+// 3 / │ \ 1               │
+//  /  │  \                │1
+// 0   │   6               │
+//  \  │  /│\              │
+// 1 \ │ / │ \2            │4
+//    \|/  │  \            │
+//     5   │   \           │
+//      \  │1   \          │
+//     3 \ │     \         │
+//        \│      \        │
+//         4 ──────2───────3

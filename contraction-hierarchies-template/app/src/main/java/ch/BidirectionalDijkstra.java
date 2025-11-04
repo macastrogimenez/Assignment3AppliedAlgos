@@ -7,7 +7,11 @@ import java.util.PriorityQueue;
 
 public class BidirectionalDijkstra {
     
-    public double shortestPath(Graph g, long from, long to) {
+    public double distance(Graph g, long from, long to) {
+        long start = System.nanoTime(); // TODO: unused yet, but added to count the time, implement output as Result 
+        int relaxed = 0; // TODO: unused yet, but added to count the number of relaxed edges, implement output as Result
+
+        if (from == to) return 0;
         //List<Map<Long, Double>> maps = new ArrayList<>(2);
         HashMap<Long, Integer> dLeft = new HashMap<>();
         HashMap<Long, Integer> dRight = new HashMap<>();
@@ -46,36 +50,44 @@ public class BidirectionalDijkstra {
                 break;
             }
             settled.add(u); 
-            for (Graph.Edge e : g.getNeighbours(u)) {
-                int w = e.weight;
-                Long v = e.to;
-                if (side == 0) { // left
-                    int du = dLeft.getOrDefault(u, Integer.MAX_VALUE);
-                    int dv = dLeft.getOrDefault(v, Integer.MAX_VALUE);
-                    if ((long) du + w < dv) {
-                        int newDist = du + w;
-                        dLeft.put(v, newDist);
-                        pqLeft.add(new PQElem(newDist, v));
+            try {
+                for (Graph.Edge e : g.getNeighbours(u)) {
+                    relaxed++; // TODO: unused yet, but added to count the number of relaxed edges, implement output as Result 
+                    int w = e.weight;
+                    Long v = e.to;
+                    if (side == 0) { // left
+                        int du = dLeft.getOrDefault(u, Integer.MAX_VALUE);
+                        int dv = dLeft.getOrDefault(v, Integer.MAX_VALUE);
+                        if ((long) du + w < dv) {
+                            int newDist = du + w;
+                            dLeft.put(v, newDist);
+                            pqLeft.add(new PQElem(newDist, v));
+                        }
+                    } else {
+                        int du = dRight.getOrDefault(u, Integer.MAX_VALUE);
+                        int dv = dRight.getOrDefault(v, Integer.MAX_VALUE);
+                        if ((long) du + w < dv) {
+                            int newDist = du + w;
+                            dRight.put(v, newDist);
+                            pqRight.add(new PQElem(newDist, v));
+                        }
                     }
-                } else {
-                    int du = dRight.getOrDefault(u, Integer.MAX_VALUE);
-                    int dv = dRight.getOrDefault(v, Integer.MAX_VALUE);
-                    if ((long) du + w < dv) {
-                        int newDist = du + w;
-                        dRight.put(v, newDist);
-                        pqRight.add(new PQElem(newDist, v));
-                    }
-                }
 
-                int dl = dLeft.getOrDefault(v, Integer.MAX_VALUE);
-                int dr = dRight.getOrDefault(v, Integer.MAX_VALUE);
-                if (dl < Integer.MAX_VALUE && dr < Integer.MAX_VALUE) {
-                    distance = Math.min(distance, (double) dl + (double) dr);
+                    int dl = dLeft.getOrDefault(v, Integer.MAX_VALUE);
+                    int dr = dRight.getOrDefault(v, Integer.MAX_VALUE);
+                    if (dl < Integer.MAX_VALUE && dr < Integer.MAX_VALUE) {
+                        distance = Math.min(distance, (double) dl + (double) dr);
+                    }
                 }
+            } catch (NullPointerException e) {
+                    long end = System.nanoTime(); // TODO: unused yet, but added to count the time, implement output as Result 
+                    return -1.0; // if the loop attempts to 
+                    // get the neighbours of an edge and receives null
+                    // then BD returns -1.0
             }
+            
         }
+        long end = System.nanoTime(); // TODO: unused yet, but added to count the time, implement output as Result 
         return distance;
-
-    }
-    
+    }   
 }

@@ -55,3 +55,4 @@ public class DijkstraTest {
         assertEquals("Distance from a node to itself should be 0", 0, (long) dist.result);
 }
 }
+
