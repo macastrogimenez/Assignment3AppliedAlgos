@@ -7,11 +7,14 @@ import java.util.PriorityQueue;
 
 public class BidirectionalDijkstra {
     
-    public double distance(Graph g, long from, long to) {
-        long start = System.nanoTime(); // TODO: unused yet, but added to count the time, implement output as Result 
-        int relaxed = 0; // TODO: unused yet, but added to count the number of relaxed edges, implement output as Result
+    public Result<Double> distance(Graph g, long from, long to) {
+        long start = System.nanoTime(); 
+        int relaxed = 0; 
 
-        if (from == to) return 0;
+        if (from == to) { // if we are checking the distance from a vertex to itself it should be 0
+            long end = System.nanoTime();
+            return new Result<>(end - start, relaxed, 0.0);
+        }
         //List<Map<Long, Double>> maps = new ArrayList<>(2);
         HashMap<Long, Integer> dLeft = new HashMap<>();
         HashMap<Long, Integer> dRight = new HashMap<>();
@@ -52,7 +55,7 @@ public class BidirectionalDijkstra {
             settled.add(u); 
             try {
                 for (Graph.Edge e : g.getNeighbours(u)) {
-                    relaxed++; // TODO: unused yet, but added to count the number of relaxed edges, implement output as Result 
+                    relaxed++; 
                     int w = e.weight;
                     Long v = e.to;
                     if (side == 0) { // left
@@ -80,14 +83,14 @@ public class BidirectionalDijkstra {
                     }
                 }
             } catch (NullPointerException e) {
-                    long end = System.nanoTime(); // TODO: unused yet, but added to count the time, implement output as Result 
-                    return -1.0; // if the loop attempts to 
+                    long end = System.nanoTime(); 
+                    return new Result<>(end - start, relaxed, -1.0);
                     // get the neighbours of an edge and receives null
                     // then BD returns -1.0
             }
             
         }
-        long end = System.nanoTime(); // TODO: unused yet, but added to count the time, implement output as Result 
-        return distance;
+        long end = System.nanoTime(); 
+        return new Result<Double>(end - start, relaxed, distance);
     }   
 }

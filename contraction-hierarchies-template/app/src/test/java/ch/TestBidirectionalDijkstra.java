@@ -30,15 +30,15 @@ public class TestBidirectionalDijkstra {
     @Test
     public void testBidirectionalDijkstra_basic() {
         BidirectionalDijkstra bd = new BidirectionalDijkstra();
-        Double result = bd.distance(g, 1, 4) ;
-        assertEquals("Distance 1→2→3→4 should have total cost 7", 7.0, result, 0.001);
+        Result<Double> result = bd.distance(g, 1, 4) ;
+        assertEquals("Distance 1→2→3→4 should have total cost 7", 7.0, result.result, 0.001);
     }
 
     @Test
     public void testBidirectionalDijkstra_directConnection() {
         BidirectionalDijkstra bd = new BidirectionalDijkstra();
-        Double result = bd.distance(g, 1, 2);
-        assertEquals("Direct edge 1→2 should cost 4", 4.0, result, 0.0001);
+        Result<Double> result = bd.distance(g, 1, 2);
+        assertEquals("Direct edge 1→2 should cost 4", 4.0, result.result, 0.0001);
     }
 
     @Test
@@ -50,15 +50,15 @@ public class TestBidirectionalDijkstra {
         disconnected.addUndirectedEdge(1, 2, 4);
         // no edges between 1 and 3
         BidirectionalDijkstra bd = new BidirectionalDijkstra();
-        Double result = bd.distance(disconnected, 1, 3);
-        assertEquals("Unreachable vertex should return -1",-1.0,result, 0.001);
+        Result<Double> result = bd.distance(disconnected, 1, 3);
+        assertEquals("Unreachable vertex should return -1",-1.0,result.result, 0.001);
     }
     
     @Test
     public void testBidirectionalDijkstra_sameNode() {
         BidirectionalDijkstra bd = new BidirectionalDijkstra();
-        Double result = bd.distance(g, 1, 1);
-        assertEquals("Distance from a node to itself should be 0", 0.0, result, 0.001);
+        Result<Double> result = bd.distance(g, 1, 1);
+        assertEquals("Distance from a node to itself should be 0", 0.0, result.result, 0.001);
 }
 }
 
