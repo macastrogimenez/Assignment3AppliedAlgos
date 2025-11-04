@@ -18,7 +18,7 @@ public class BidirectionalDijkstra {
     int d = Integer.MAX_VALUE;
 
     //TODO: check that this is correctly initiated to the right values of s and t
-    public BidirectionalDijkstra(int s, int t){ 
+    public BidirectionalDijkstra(int s, int t, Graph g){ 
         dijkstraLeft.put(s, 0.0);
         dijkstraRight.put(t, 0.0);
         
@@ -38,16 +38,23 @@ public class BidirectionalDijkstra {
             PriorityQueue<Vertex> currentQueue; // to keep a copy of the next vertex to visit;
 
             if (!queueLeft.isEmpty() && (minQLeft.compareTo(minQRight)<0)){ //if leftQ not empty and min of leftQ < min of rightQ 
-                currentQueue = queueLeft; // set i to left element
+                currentQueue = queueLeft; // choose the leftQ
             }
             else {
-                currentQueue = queueRight; // set i to right element
+                currentQueue = queueRight; // else choose the rightQ
             }
             
-            // retrieve the ID of the 
+            // retrieve the id of the vertex with lowest distance
             var elem = currentQueue.poll();
             int u = elem.getVertexId();
 
+            if (settled.contains(u)){ // if vertex has already been visited break
+                break;
+            }
+
+            settled.add(u); // else add the vertex to settled
+
+            // TODO: from point 16 of pseudocode onwards
             
 
 
@@ -55,15 +62,6 @@ public class BidirectionalDijkstra {
 
 
         }
-
-
-        // while (!pq.isEmpty()&& pq.peek().v != to) {
-        //     PQElem elem = pq.poll();
-        //     long u = elem.v;
-        //     if (visited.contains(u)) {
-        //         continue;
-        //     }
-        // }
 
         
 
