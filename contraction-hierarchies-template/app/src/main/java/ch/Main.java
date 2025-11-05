@@ -43,15 +43,15 @@ class Main {
     public static void main(String[] args) throws Exception {
         String filePath;
         String algorithm;
-        int start, target;
+        long start, target;  // Changed from int to long
         
         // Check if file path is provided as command line argument
         if (args.length >= 4) {
             // Read from command line arguments: <file> <algorithm> <start> <target>
             filePath = args[0];
             algorithm = args[1];
-            start = Integer.parseInt(args[2]);
-            target = Integer.parseInt(args[3]);
+            start = Long.parseLong(args[2]);  // Changed from Integer.parseInt
+            target = Long.parseLong(args[3]); // Changed from Integer.parseInt
         } else {
             // Fall back to reading from stdin
             Scanner sc = new Scanner(System.in);
@@ -70,8 +70,8 @@ class Main {
             fileScanner.close();
 
             algorithm = sc.nextLine();
-            start = sc.nextInt();
-            target = sc.nextInt();
+            start = sc.nextLong();  // Changed from nextInt()
+            target = sc.nextLong(); // Changed from nextInt()
             sc.close();
             
             runAlgorithm(graph, algorithm, start, target);
@@ -93,7 +93,7 @@ class Main {
         runAlgorithm(graph, algorithm, start, target);
     }
     
-    private static void runAlgorithm(Graph graph, String algorithm, int start, int target) {
+    private static void runAlgorithm(Graph graph, String algorithm, long start, long target) {
         if(algorithm.equals("BD")){
             //System.out.println(graph.n + " " + graph.m); //TODO: discuss the purpose of this -> why does it double edges?
             BidirectionalDijkstra d = new BidirectionalDijkstra();
