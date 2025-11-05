@@ -36,6 +36,11 @@ application {
     mainClass = 'ch.Main'
 }
 
+// Set working directory to project root when running with 'gradle run'
+run {
+    workingDir = project.rootDir
+}
+
 jar {
     manifest {
         attributes 'Main-Class': 'ch.Main'

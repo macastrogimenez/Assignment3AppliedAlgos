@@ -1,5 +1,6 @@
 package ch;
 
+import java.io.File;
 import java.util.Scanner;
 
 class Main {
@@ -40,13 +41,59 @@ class Main {
     }
 
     public static void main(String[] args) throws Exception {
-        Scanner sc = new Scanner(System.in);
-        String algorithm = sc.nextLine();
-        int start = sc.nextInt();
-        int target = sc.nextInt();
+        String filePath;
+        String algorithm;
+        int start, target;
+        
+        // Check if file path is provided as command line argument
+        if (args.length >= 4) {
+            // Read from command line arguments: <file> <algorithm> <start> <target>
+            filePath = args[0];
+            algorithm = args[1];
+            start = Integer.parseInt(args[2]);
+            target = Integer.parseInt(args[3]);
+        } else {
+            // Fall back to reading from stdin
+            Scanner sc = new Scanner(System.in);
+            filePath = sc.nextLine().trim();
+            
+            // Create a new scanner to read from the .graph file
+            File graphFile = new File(filePath);
+            if (!graphFile.exists()) {
+                System.err.println("Error: File not found: " + filePath);
+                System.err.println("Current working directory: " + System.getProperty("user.dir"));
+                System.err.println("Absolute path tried: " + graphFile.getAbsolutePath());
+                System.exit(1);
+            }
+            Scanner fileScanner = new Scanner(graphFile);
+            var graph = readGraph(fileScanner);
+            fileScanner.close();
 
-        var graph = readGraph(sc);
-        sc.close();
+            algorithm = sc.nextLine();
+            start = sc.nextInt();
+            target = sc.nextInt();
+            sc.close();
+            
+            runAlgorithm(graph, algorithm, start, target);
+            return;
+        }
+        
+        // Read graph from file
+        File graphFile = new File(filePath);
+        if (!graphFile.exists()) {
+            System.err.println("Error: File not found: " + filePath);
+            System.err.println("Current working directory: " + System.getProperty("user.dir"));
+            System.err.println("Absolute path tried: " + graphFile.getAbsolutePath());
+            System.exit(1);
+        }
+        Scanner fileScanner = new Scanner(graphFile);
+        var graph = readGraph(fileScanner);
+        fileScanner.close();
+        
+        runAlgorithm(graph, algorithm, start, target);
+    }
+    
+    private static void runAlgorithm(Graph graph, String algorithm, int start, int target) {
         if(algorithm.equals("BD")){
             //System.out.println(graph.n + " " + graph.m); //TODO: discuss the purpose of this -> why does it double edges?
             BidirectionalDijkstra d = new BidirectionalDijkstra();
@@ -57,9 +104,7 @@ class Main {
             // TODO: run the graph with regular dijkstra and return result with time, relaxed edges and result
             Result<Integer> result = Dijkstra.shortestPath(graph, start, target); // Ula values: graph,1,15
             System.out.println("Time: "+result.time+", Relaxed edges: "+result.relaxed+", Result: "+result.result);
-        }   
-        
-        
+        }
     }
 }
 

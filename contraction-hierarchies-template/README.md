@@ -23,6 +23,35 @@ We have implemented basic functionality such as graph reading, a graph data stru
 
 To solve the assignment, you probably need to update the API by changing method signatures to incorporate additional functionality.
 
+## How to run the Program
 
+From Gradle:
+```
+bash
 
+# From the project root
+gradle run --args="denmark.graph BD 115739 115775" # for Bidirectional Dijkstra
+gradle run --args="denmark.graph D 115739 115775" # for Dijkstra
 
+# Or
+gradle run --args="test.graph BD 0 3" # for Bidirectional Dijkstra
+```
+
+From JAR file:
+```
+bash
+# Navigate to project root
+cd /Users/miguela/Documents/1.\ ITU/1.\ Applied\ Algorithms/Assignment3/contraction-hierarchies-template
+
+# Build JAR
+gradle jar
+
+# Run with test graph
+java -jar app/build/libs/app.jar test.graph BD 0 3
+
+# Run with denmark graph
+java -jar app/build/libs/app.jar denmark.graph BD 0 100
+
+# Run with regular Dijkstra
+java -jar app/build/libs/app.jar denmark.graph D 0 100
+```
