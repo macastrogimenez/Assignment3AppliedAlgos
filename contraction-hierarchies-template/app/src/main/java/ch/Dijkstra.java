@@ -35,7 +35,9 @@ public class Dijkstra {
             visited.add(u);
 
             int dist = elem.key;
-            for (Graph.Edge e : g.getNeighbours(u)) {
+
+            for (Graph.Edge e : g.getNeighbours(u)) {;
+                // System.out.println("Edge from "+u+" to "+e.to); -> this allows you to see which edges have been relaxed (remember that undirected edges are composed of two directed edges in opposite directions)
                 relaxed++;
                 long v = e.to;
                 int w = e.weight;

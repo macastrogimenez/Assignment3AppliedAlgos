@@ -55,13 +55,14 @@ public class BidirectionalDijkstra {
             settled.add(u); 
             try {
                 for (Graph.Edge e : g.getNeighbours(u)) {
-                    relaxed++; 
                     int w = e.weight;
                     Long v = e.to;
                     if (side == 0) { // left
                         int du = dLeft.getOrDefault(u, Integer.MAX_VALUE);
                         int dv = dLeft.getOrDefault(v, Integer.MAX_VALUE);
                         if ((long) du + w < dv) {
+                            System.out.println("Edge from "+u+" to "+e.to); // -> this allows you to see which edges have been relaxed (remember that undirected edges are composed of two directed edges in opposite directions)
+                            relaxed++;  // Only count actual relaxations
                             int newDist = du + w;
                             dLeft.put(v, newDist);
                             pqLeft.add(new PQElem(newDist, v));
@@ -70,6 +71,8 @@ public class BidirectionalDijkstra {
                         int du = dRight.getOrDefault(u, Integer.MAX_VALUE);
                         int dv = dRight.getOrDefault(v, Integer.MAX_VALUE);
                         if ((long) du + w < dv) {
+                            System.out.println("Edge from "+u+" to "+e.to); //-> this allows you to see which edges have been relaxed (remember that undirected edges are composed of two directed edges in opposite directions)
+                            relaxed++;  // Only count actual relaxations
                             int newDist = du + w;
                             dRight.put(v, newDist);
                             pqRight.add(new PQElem(newDist, v));

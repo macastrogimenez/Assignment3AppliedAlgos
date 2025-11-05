@@ -1,6 +1,5 @@
 package ch;
 
-import java.sql.Time;
 import java.util.Scanner;
 
 class Main {
@@ -54,10 +53,9 @@ class Main {
             Result<Double> result = d.distance(graph, start, target); // Ula values: graph,1,15
             System.out.println("Time: "+result.time+", Relaxed edges: "+result.relaxed+", Result: "+result.result);
         }
-        else{
+        else if (algorithm.equals("D")){
             // TODO: run the graph with regular dijkstra and return result with time, relaxed edges and result
-            Dijkstra d = new BidirectionalDijkstra();
-            Result<Double> result = d.distance(graph, start, target); // Ula values: graph,1,15
+            Result<Integer> result = Dijkstra.shortestPath(graph, start, target); // Ula values: graph,1,15
             System.out.println("Time: "+result.time+", Relaxed edges: "+result.relaxed+", Result: "+result.result);
         }   
         
