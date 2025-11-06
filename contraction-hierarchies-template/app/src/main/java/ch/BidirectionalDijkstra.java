@@ -9,6 +9,15 @@ public class BidirectionalDijkstra {
     
     public Result<Double> distance(Graph g, long from, long to) {
         //List<Map<Long, Double>> maps = new ArrayList<>(2);
+
+        long start = System.nanoTime(); 
+        int relaxed = 0; 
+
+        if (from == to) { // if we are checking the distance from a vertex to itself it should be 0
+            long end = System.nanoTime();
+            return new Result<>(end - start, relaxed, 0.0);
+        }
+
         HashMap<Long, Integer> dLeft = new HashMap<>();
         HashMap<Long, Integer> dRight = new HashMap<>();
         dLeft.put(from, 0);
@@ -51,43 +60,54 @@ public class BidirectionalDijkstra {
             settled.add(u);
 
             int dist = elem.key; //distance to u 
-             
-            for (Graph.Edge e : g.getNeighbours(u)) {
-                int w = e.weight;
-                Long v = e.to;
-                if (side == 0) { // left
-                    int dv = dLeft.getOrDefault(v, Integer.MAX_VALUE);
-                    if ((long) dist + w < dv) {
-                        int newDist = dist + w;
-                        dLeft.put(v, newDist);
-                        pqLeft.add(new PQElem(newDist, v));
-                        System.out.println("LEFT: updated "+ v+ " to distance "+ newDist);
+            try { 
+                for (Graph.Edge e : g.getNeighbours(u)) {
+                    int w = e.weight;
+                    Long v = e.to;
+                    if (side == 0) { // left
+                        int dv = dLeft.getOrDefault(v, Integer.MAX_VALUE);
+                        if ((long) dist + w < dv) {
+                            relaxed++;  // Only count actual relaxations
+                            int newDist = dist + w;
+                            dLeft.put(v, newDist);
+                            pqLeft.add(new PQElem(newDist, v));
+                            System.out.println("LEFT: updated "+ v+ " to distance "+ newDist);
+                        }
+                    } else {
+                        int dv = dRight.getOrDefault(v, Integer.MAX_VALUE);
+                        if ((long) dist + w < dv) {
+                            relaxed++;  // Only count actual relaxations
+                            int newDist = dist + w;
+                            dRight.put(v, newDist);
+                            pqRight.add(new PQElem(newDist, v));
+                            System.out.println("RIGHT: updated "+ v+ " to distance "+ newDist);
+                        }
                     }
-                } else {
-                    int dv = dRight.getOrDefault(v, Integer.MAX_VALUE);
-                    if ((long) dist + w < dv) {
-                        int newDist = dist + w;
-                        dRight.put(v, newDist);
-                        pqRight.add(new PQElem(newDist, v));
-                        System.out.println("RIGHT: updated "+ v+ " to distance "+ newDist);
-                    }
-                }
 
-                int dl = dLeft.getOrDefault(v, Integer.MAX_VALUE);
-                int dr = dRight.getOrDefault(v, Integer.MAX_VALUE);
-                if (dl < Integer.MAX_VALUE && dr < Integer.MAX_VALUE) {
-                    distance = Math.min(distance, (double) dl + (double) dr);
-                    meetingNode = v;
-                    break;
+                    int dl = dLeft.getOrDefault(v, Integer.MAX_VALUE);
+                    int dr = dRight.getOrDefault(v, Integer.MAX_VALUE);
+                    if (dl < Integer.MAX_VALUE && dr < Integer.MAX_VALUE) {
+                        distance = Math.min(distance, (double) dl + (double) dr);
+                        meetingNode = v;
+                        break;
+                    }
                 }
+            } catch (NullPointerException e) {
+                    long end = System.nanoTime(); 
+                    return new Result<>(end - start, relaxed, -1.0);
+                    // get the neighbours of an edge and receives null
+                    // then BD returns -1.0
             }
+
             if (meetingNode != null) {
-            break; // now we have an actual connection between sides
+                break; // now we have an actual connection between sides
             }
         }
-        Result<Double> distanceRes = new Result<>(0L, 0, distance);
-        return distanceRes;
+        
+        long end = System.nanoTime(); 
+        return new Result<Double>(end - start, relaxed, distance);
 
     }
     
 }
+
