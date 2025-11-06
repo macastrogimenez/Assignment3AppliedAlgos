@@ -1,5 +1,6 @@
 package ch;
 
+import java.io.File;
 import java.util.Scanner;
 
 class Main {
@@ -10,39 +11,99 @@ class Main {
 
         Graph g = new Graph();
 
-        long id;
+        // temporary variables to save vertex data from input
+        long id; 
         float x, y;
         long[] ids = new long[n];
 
-        for (int i = 0; i < n; i++) {
-            id = sc.nextLong();
+        for (int i = 0; i < n; i++) { // loop over vertex lines
+            id = sc.nextLong(); // vertex id 
 
-            ids[i] = id;
-            x = Float.parseFloat(sc.next());
-            y = Float.parseFloat(sc.next());
+            ids[i] = id; // map the vertex on an array of vertices
+            x = Float.parseFloat(sc.next()); // coord x of vertex 
+            y = Float.parseFloat(sc.next()); // coord y of vertex 
 
-            g.addVertex(id, new Graph.Vertex(x, y));
+            g.addVertex(id, new Graph.Vertex(x, y)); // add vertex with id, coord x and y to graph
         }
 
+        // temporary variables to save edge data from input
         long from, to;
         int weight;
 
-        for (int i = 0; i < m; i++) {
-            from = sc.nextLong();
+        for (int i = 0; i < m; i++) { // loop over edge lines
+            from = sc.nextLong(); 
             to = sc.nextLong();
             weight = sc.nextInt();
-            g.addUndirectedEdge(from, to, weight);
+            g.addUndirectedEdge(from, to, weight); // saving the edges to the graph
         }
 
         return g;
     }
 
     public static void main(String[] args) throws Exception {
-        Scanner sc = new Scanner(System.in);
-        var graph = readGraph(sc);
-        sc.close();
-        System.out.println(graph.n + " " + graph.m);
-        BidirectionalDijkstra d = new BidirectionalDijkstra();
-        System.out.println(d.shortestPath(graph, 1, 15));
+        String filePath;
+        String algorithm;
+        long start, target;  // Changed from int to long
+        
+        // Check if file path is provided as command line argument
+        if (args.length >= 4) {
+            // Read from command line arguments: <file> <algorithm> <start> <target>
+            filePath = args[0];
+            algorithm = args[1];
+            start = Long.parseLong(args[2]);  // Changed from Integer.parseInt
+            target = Long.parseLong(args[3]); // Changed from Integer.parseInt
+        } else {
+            // Fall back to reading from stdin
+            Scanner sc = new Scanner(System.in);
+            filePath = sc.nextLine().trim();
+            
+            // Create a new scanner to read from the .graph file
+            File graphFile = new File(filePath);
+            if (!graphFile.exists()) {
+                System.err.println("Error: File not found: " + filePath);
+                System.err.println("Current working directory: " + System.getProperty("user.dir"));
+                System.err.println("Absolute path tried: " + graphFile.getAbsolutePath());
+                System.exit(1);
+            }
+            Scanner fileScanner = new Scanner(graphFile);
+            var graph = readGraph(fileScanner);
+            fileScanner.close();
+
+            algorithm = sc.nextLine();
+            start = sc.nextLong();  // Changed from nextInt()
+            target = sc.nextLong(); // Changed from nextInt()
+            sc.close();
+            
+            runAlgorithm(graph, algorithm, start, target);
+            return;
+        }
+        
+        // Read graph from file
+        File graphFile = new File(filePath);
+        if (!graphFile.exists()) {
+            System.err.println("Error: File not found: " + filePath);
+            System.err.println("Current working directory: " + System.getProperty("user.dir"));
+            System.err.println("Absolute path tried: " + graphFile.getAbsolutePath());
+            System.exit(1);
+        }
+        Scanner fileScanner = new Scanner(graphFile);
+        var graph = readGraph(fileScanner);
+        fileScanner.close();
+        
+        runAlgorithm(graph, algorithm, start, target);
+    }
+    
+    private static void runAlgorithm(Graph graph, String algorithm, long start, long target) {
+        if(algorithm.equals("BD")){
+            //System.out.println(graph.n + " " + graph.m); //TODO: discuss the purpose of this -> why does it double edges?
+            BidirectionalDijkstra d = new BidirectionalDijkstra();
+            Result<Double> result = d.distance(graph, start, target); // Ula values: graph,1,15
+            System.out.println("Time: "+result.time+", Relaxed edges: "+result.relaxed+", Result: "+result.result);
+        }
+        else if (algorithm.equals("D")){
+            // TODO: run the graph with regular dijkstra and return result with time, relaxed edges and result
+            Result<Integer> result = Dijkstra.shortestPath(graph, start, target); // Ula values: graph,1,15
+            System.out.println("Time: "+result.time+", Relaxed edges: "+result.relaxed+", Result: "+result.result);
+        }
     }
 }

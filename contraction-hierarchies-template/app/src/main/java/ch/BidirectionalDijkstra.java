@@ -7,7 +7,7 @@ import java.util.PriorityQueue;
 
 public class BidirectionalDijkstra {
     
-    public double shortestPath(Graph g, long from, long to) {
+    public Result<Double> distance(Graph g, long from, long to) {
         //List<Map<Long, Double>> maps = new ArrayList<>(2);
         HashMap<Long, Integer> dLeft = new HashMap<>();
         HashMap<Long, Integer> dRight = new HashMap<>();
@@ -15,6 +15,7 @@ public class BidirectionalDijkstra {
         dRight.put(to, 0);
         //maps.add(dLeft);
         //maps.add(dRight);
+        Long meetingNode = null;
 
         HashSet<Long> settled = new HashSet<>();
         double distance = Integer.MAX_VALUE;
@@ -34,37 +35,41 @@ public class BidirectionalDijkstra {
             // choose the queue with the smaller head; handle empty queues safely
             PQElem leftTop = pqLeft.peek();
             PQElem rightTop = pqRight.peek();
+            PQElem elem = new PQElem(0,0L);
             if (leftTop != null && (rightTop == null || leftTop.compareTo(rightTop) <= 0)) {
-                u = pqLeft.poll().v;
-                side = 0;
+                elem = pqLeft.poll();
+                u = elem.v;
             } else {
                 side = 1;
-                u = pqRight.poll().v;
+                elem = pqRight.poll();
+                u = elem.v;
             }
-            if (settled.contains(u)) {
+            //if (settled.contains(u)) {//this one was wrong!!
                 // u was settled by another instance
-                break;
-            }
+                //break;
+            //}
             settled.add(u);
+
+            int dist = elem.key; //distance to u 
              
             for (Graph.Edge e : g.getNeighbours(u)) {
                 int w = e.weight;
                 Long v = e.to;
                 if (side == 0) { // left
-                    int du = dLeft.getOrDefault(u, Integer.MAX_VALUE);
                     int dv = dLeft.getOrDefault(v, Integer.MAX_VALUE);
-                    if ((long) du + w < dv) {
-                        int newDist = du + w;
+                    if ((long) dist + w < dv) {
+                        int newDist = dist + w;
                         dLeft.put(v, newDist);
                         pqLeft.add(new PQElem(newDist, v));
+                        System.out.println("LEFT: updated "+ v+ " to distance "+ newDist);
                     }
                 } else {
-                    int du = dRight.getOrDefault(u, Integer.MAX_VALUE);
                     int dv = dRight.getOrDefault(v, Integer.MAX_VALUE);
-                    if ((long) du + w < dv) {
-                        int newDist = du + w;
+                    if ((long) dist + w < dv) {
+                        int newDist = dist + w;
                         dRight.put(v, newDist);
                         pqRight.add(new PQElem(newDist, v));
+                        System.out.println("RIGHT: updated "+ v+ " to distance "+ newDist);
                     }
                 }
 
@@ -72,10 +77,16 @@ public class BidirectionalDijkstra {
                 int dr = dRight.getOrDefault(v, Integer.MAX_VALUE);
                 if (dl < Integer.MAX_VALUE && dr < Integer.MAX_VALUE) {
                     distance = Math.min(distance, (double) dl + (double) dr);
+                    meetingNode = v;
+                    break;
                 }
             }
+            if (meetingNode != null) {
+            break; // now we have an actual connection between sides
+            }
         }
-        return distance;
+        Result<Double> distanceRes = new Result<>(0L, 0, distance);
+        return distanceRes;
 
     }
     
