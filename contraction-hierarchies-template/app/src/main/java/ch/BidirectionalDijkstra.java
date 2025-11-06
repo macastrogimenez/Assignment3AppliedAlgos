@@ -55,13 +55,13 @@ public class BidirectionalDijkstra {
             settled.add(u); 
             try {
                 for (Graph.Edge e : g.getNeighbours(u)) {
-                    int w = e.weight;
-                    Long v = e.to;
+                    int w = e.weight; // Saves weight of the current edge
+                    Long v = e.to; // 
                     if (side == 0) { // left
-                        int du = dLeft.getOrDefault(u, Integer.MAX_VALUE);
-                        int dv = dLeft.getOrDefault(v, Integer.MAX_VALUE);
+                        int du = dLeft.getOrDefault(u, Integer.MAX_VALUE); // distance from left start to u, if no distance, then infinite
+                        int dv = dLeft.getOrDefault(v, Integer.MAX_VALUE); // distance from left start to v, if no distance, then infinite
                         if ((long) du + w < dv) {
-                            // System.out.println("Edge from "+u+" to "+e.to); // -> this allows you to see which edges have been relaxed (remember that undirected edges are composed of two directed edges in opposite directions)
+                            System.out.println("Edge from "+u+" to "+e.to+" weight: "+e.weight); // -> this allows you to see which edges have been relaxed (remember that undirected edges are composed of two directed edges in opposite directions)
                             relaxed++;  // Only count actual relaxations
                             int newDist = du + w;
                             dLeft.put(v, newDist);
@@ -69,7 +69,9 @@ public class BidirectionalDijkstra {
                         }
                     } else {
                         int du = dRight.getOrDefault(u, Integer.MAX_VALUE);
+                        System.out.println("Distance to current node "+du );
                         int dv = dRight.getOrDefault(v, Integer.MAX_VALUE);
+                        System.out.println("Distance to next node "+dv );
                         if ((long) du + w < dv) {
                             // System.out.println("Edge from "+u+" to "+e.to); //-> this allows you to see which edges have been relaxed (remember that undirected edges are composed of two directed edges in opposite directions)
                             relaxed++;  // Only count actual relaxations
@@ -80,9 +82,12 @@ public class BidirectionalDijkstra {
                     }
 
                     int dl = dLeft.getOrDefault(v, Integer.MAX_VALUE);
+                    System.out.println("Value dl: "+dl);
                     int dr = dRight.getOrDefault(v, Integer.MAX_VALUE);
+                    System.out.println("Value dr: "+dr);
                     if (dl < Integer.MAX_VALUE && dr < Integer.MAX_VALUE) {
                         distance = Math.min(distance, (double) dl + (double) dr);
+                        System.out.println("Distance value: "+distance);
                     }
                 }
             } catch (NullPointerException e) {

@@ -30,8 +30,8 @@ From Gradle:
 bash
 
 # From the project root
-gradle run --args="denmark.graph BD 115739 115775" # for Bidirectional Dijkstra
-gradle run --args="denmark.graph D 115739 115775" # for Dijkstra
+gradle run --args="denmark.graph BD 1096800199 1124791586" # for Bidirectional Dijkstra
+gradle run --args="denmark.graph BD 115739 115775" # for Dijkstra
 
 # Or
 gradle run --args="test.graph BD 0 3" # for Bidirectional Dijkstra
