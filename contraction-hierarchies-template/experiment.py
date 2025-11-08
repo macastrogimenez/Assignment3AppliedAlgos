@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 # Configuration
-GRAPH_FILE = "denmark.graph"
+GRAPH_FILE = "app/denmark.graph"
 JAR_PATH = "app/build/libs/app.jar"
 ALGORITHMS = ["D", "BD"]  # Regular Dijkstra and Bidirectional Dijkstra
 NUM_PAIRS = 1000

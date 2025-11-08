@@ -69,7 +69,7 @@ public class BidirectionalDijkstra {
                             int newDist = dist + w;
                             dLeft.put(v, newDist);
                             pqLeft.add(new PQElem(newDist, v));
-                            System.out.println("LEFT: updated "+ v+ " to distance "+ newDist);
+                            //System.out.println("LEFT: updated "+ v+ " to distance "+ newDist);
                         }
                     } else {
                         int dv = dRight.getOrDefault(v, Integer.MAX_VALUE);
@@ -78,7 +78,7 @@ public class BidirectionalDijkstra {
                             int newDist = dist + w;
                             dRight.put(v, newDist);
                             pqRight.add(new PQElem(newDist, v));
-                            System.out.println("RIGHT: updated "+ v+ " to distance "+ newDist);
+                            // System.out.println("RIGHT: updated "+ v+ " to distance "+ newDist);
                         }
                     }
 
