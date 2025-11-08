@@ -100,7 +100,7 @@ public class TestBidirectionalDijkstra {
 
     @Test
     public void testBidirectionalDijkstra_basic() {
-        BidirectionalDijkstra bd = new BidirectionalDijkstra();
+        BidirectionalDijkstra2 bd = new BidirectionalDijkstra2();
         Result<Double> result = bd.distance(g, 1, 4) ;
         assertEquals("Distance 1→2→3→4 should have total cost 7", 7.0, result.result, 0.001);
     }

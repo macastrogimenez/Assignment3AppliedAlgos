@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 
-public class BidirectionalDijkstra {
+public class BidirectionalDijkstra2 {
     
     public Result<Double> distance(Graph g, long from, long to) {
         long start = System.nanoTime(); 
@@ -15,14 +15,13 @@ public class BidirectionalDijkstra {
             long end = System.nanoTime();
             return new Result<>(end - start, relaxed, 0.0);
         }
-        
+        //List<Map<Long, Double>> maps = new ArrayList<>(2);
         HashMap<Long, Integer> dLeft = new HashMap<>();
         HashMap<Long, Integer> dRight = new HashMap<>();
         dLeft.put(from, 0);
         dRight.put(to, 0);
         //maps.add(dLeft);
         //maps.add(dRight);
-        Long meetingNode = null;
 
         HashSet<Long> settled = new HashSet<>();
         double distance = Integer.MAX_VALUE;
@@ -42,53 +41,53 @@ public class BidirectionalDijkstra {
             // choose the queue with the smaller head; handle empty queues safely
             PQElem leftTop = pqLeft.peek();
             PQElem rightTop = pqRight.peek();
-            PQElem elem = new PQElem(0,0L);
             if (leftTop != null && (rightTop == null || leftTop.compareTo(rightTop) <= 0)) {
-                elem = pqLeft.poll();
-                u = elem.v;
+                u = pqLeft.poll().v;
+                side = 0;
             } else {
                 side = 1;
-                elem = pqRight.poll();
-                u = elem.v;
+                u = pqRight.poll().v;
             }
-            // if (settled.contains(u)) {
-            //     // u was settled by another instance
-            //     break;
-            // }
+            if (settled.contains(u)) {
+                // u was settled by another instance
+                break;
+            }
             settled.add(u); 
-            
-            int dist = elem.key; //distance to u 
-
-            try { 
+            try {
                 for (Graph.Edge e : g.getNeighbours(u)) {
-                    int w = e.weight;
-                    Long v = e.to;
+                    int w = e.weight; // Saves weight of the current edge
+                    Long v = e.to; // 
                     if (side == 0) { // left
-                        int dv = dLeft.getOrDefault(v, Integer.MAX_VALUE);
-                        if ((long) dist + w < dv) {
+                        int du = dLeft.getOrDefault(u, Integer.MAX_VALUE); // distance from left start to u, if no distance, then infinite
+                        int dv = dLeft.getOrDefault(v, Integer.MAX_VALUE); // distance from left start to v, if no distance, then infinite
+                        if ((long) du + w < dv) {
+                            System.out.println("Edge from "+u+" to "+e.to+" weight: "+e.weight); // -> this allows you to see which edges have been relaxed (remember that undirected edges are composed of two directed edges in opposite directions)
                             relaxed++;  // Only count actual relaxations
-                            int newDist = dist + w;
+                            int newDist = du + w;
                             dLeft.put(v, newDist);
                             pqLeft.add(new PQElem(newDist, v));
-                            System.out.println("LEFT: updated "+ v+ " to distance "+ newDist);
                         }
                     } else {
+                        int du = dRight.getOrDefault(u, Integer.MAX_VALUE);
+                        System.out.println("Distance to current node "+du );
                         int dv = dRight.getOrDefault(v, Integer.MAX_VALUE);
-                        if ((long) dist + w < dv) {
+                        System.out.println("Distance to next node "+dv );
+                        if ((long) du + w < dv) {
+                            // System.out.println("Edge from "+u+" to "+e.to); //-> this allows you to see which edges have been relaxed (remember that undirected edges are composed of two directed edges in opposite directions)
                             relaxed++;  // Only count actual relaxations
-                            int newDist = dist + w;
+                            int newDist = du + w;
                             dRight.put(v, newDist);
                             pqRight.add(new PQElem(newDist, v));
-                            System.out.println("RIGHT: updated "+ v+ " to distance "+ newDist);
                         }
                     }
 
                     int dl = dLeft.getOrDefault(v, Integer.MAX_VALUE);
+                    System.out.println("Value dl: "+dl);
                     int dr = dRight.getOrDefault(v, Integer.MAX_VALUE);
+                    System.out.println("Value dr: "+dr);
                     if (dl < Integer.MAX_VALUE && dr < Integer.MAX_VALUE) {
                         distance = Math.min(distance, (double) dl + (double) dr);
-                        meetingNode = v;
-                        break;
+                        System.out.println("Distance value: "+distance);
                     }
                 }
             } catch (NullPointerException e) {
@@ -97,12 +96,8 @@ public class BidirectionalDijkstra {
                     // get the neighbours of an edge and receives null
                     // then BD returns -1.0
             }
-
-            if (meetingNode != null) {
-                break; // now we have an actual connection between sides
-            }
+            
         }
-        
         long end = System.nanoTime(); 
         return new Result<Double>(end - start, relaxed, distance);
     }   
