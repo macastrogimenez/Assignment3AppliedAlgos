@@ -53,10 +53,9 @@ public class BidirectionalDijkstra {
                 elem = pqRight.poll();
                 u = elem.v;
             }
-            //if (settled.contains(u)) {//this one was wrong!!
-                // u was settled by another instance
-                //break;
-            //}
+            if (settled.contains(u)) {//this one was wrong!!
+                continue;
+            }
             settled.add(u);
 
             int dist = elem.key; //distance to u 
