@@ -13,9 +13,12 @@ public class Dijkstra {
      * @param g    The graph to search.
      * @param from The starting vertex ID.
      * @param to   The target vertex ID.
+     * @param skipVertex  A vertex to ignore during search (-1 if none).
+     * @param distanceLimit  A limit beyond which the search is stopped (use Integer.MAX_VALUE if none).
+
      * @return A triple containing the duration (in ns), the number of relaxed edges, and the shortest path distance. The distance is -1 if no path exists.
      */
-    public static Result<Integer> shortestPath(Graph g, long from, long to) {
+    public static Result<Integer> shortestPath(Graph g, long from, long to, long skipVertex, int distanceLimit) {
         long start = System.nanoTime();
         PriorityQueue<PQElem> pq = new PriorityQueue<>();
         Set<Long> visited = new HashSet<>();
@@ -31,15 +34,18 @@ public class Dijkstra {
             if (visited.contains(u)) {
                 continue;
             }
+            int dist = elem.key;
+            if (dist > distanceLimit) break;
+            if (u == skipVertex) continue; 
 
             visited.add(u);
 
-            int dist = elem.key;
 
             for (Graph.Edge e : g.getNeighbours(u)) {;
                 // System.out.println("Edge from "+u+" to "+e.to); -> this allows you to see which edges have been relaxed (remember that undirected edges are composed of two directed edges in opposite directions)
                 relaxed++;
                 long v = e.to;
+                if (v == skipVertex) continue;
                 int w = e.weight;
                 if (!dists.containsKey(v) || dists.get(v) > dist + w) {
                     pq.add(new PQElem(dist + w, v));
@@ -53,4 +59,19 @@ public class Dijkstra {
         }
         return new Result<>(end - start, relaxed, dists.get(to));
     }
+
+    /**
+     * Overload: shortest path without skipVertex and distanceLimit (uses defaults).
+     */
+    public static Result<Integer> shortestPath(Graph g, long from, long to) {
+        return shortestPath(g, from, to, -1L, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Overload: shortest path with skipVertex but default distanceLimit.
+     */
+    public static Result<Integer> shortestPath(Graph g, long from, long to, long skipVertex) {
+        return shortestPath(g, from, to, skipVertex, Integer.MAX_VALUE);
+    }
+
 }
