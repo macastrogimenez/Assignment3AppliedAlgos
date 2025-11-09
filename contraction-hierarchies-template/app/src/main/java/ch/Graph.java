@@ -219,7 +219,7 @@ public class Graph {
 
     public PreprocessResult preprocess(int checkInterval){
         List<Shortcut> allShortcuts = new ArrayList<>();
-        Map<Long, Integer> contractionOrder = new HashMap<>();
+        //Map<Long, Integer> contractionOrder = new HashMap<>();
 
         Map<Long, Integer> currentKey = new HashMap<>();   // vertex -> key (edge difference)
         PriorityQueue<PQElem> pq = new PriorityQueue<>();
@@ -269,7 +269,7 @@ public class Graph {
 
                 // Debug
                 if (lazyUpdates % 100 == 0) {
-                    System.out.println("  lazy updates so far: " + lazyUpdates + " (last updated vertex " + v + ")");
+                    //System.out.println("  lazy updates so far: " + lazyUpdates + " (last updated vertex " + v + ")");
                 }
 
                 // Check whether to trigger full refresh
@@ -303,7 +303,7 @@ public class Graph {
             }
 
             ranks.put(v, rank++);
-            System.out.println("Contracting vertex " + v + " (rank " + (rank - 1) + ")");
+            // System.out.println("Contracting vertex " + v + " (rank " + (rank - 1) + ")");
 
             // Key matched: we can now contract v
             // Contract and update graph in-place; contractAndUpdate returns list of added shortcuts

@@ -99,7 +99,7 @@ class Main {
             BidirectionalDijkstra d = new BidirectionalDijkstra();
             Result<Double> result = d.distance(graph, start, target); // Ula values: graph,1,15
             System.out.println("Time: "+result.time+", Relaxed edges: "+result.relaxed+", Result: "+result.result);
-            ContractionHierachy.storeGraph(graph, "firstTry");
+            ContractionHierachy.storeGraph(graph, "preprocessedDk");
         }
         else if (algorithm.equals("D")){
             // TODO: run the graph with regular dijkstra and return result with time, relaxed edges and result
