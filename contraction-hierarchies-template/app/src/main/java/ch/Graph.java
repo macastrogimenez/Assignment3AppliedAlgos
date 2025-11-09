@@ -226,6 +226,7 @@ public class Graph {
         Set<Long> verticesSet = new HashSet<>(this.vertices.keySet());
 
         int totalVertices = verticesSet.size();
+        int contracted = 0;
 
         System.out.println("Preprocessing CH: total vertices = " + totalVertices);
 
@@ -307,6 +308,10 @@ public class Graph {
             // Key matched: we can now contract v
             // Contract and update graph in-place; contractAndUpdate returns list of added shortcuts
             List<Shortcut> newShortcuts = this.contract(v);
+            contracted++;
+            if (contracted%10000==0){
+                System.out.println("Contracted vertices: " + contracted);
+            }
             allShortcuts.addAll(newShortcuts); // collect them
             contractedCount++;
             currentKey.remove(v);
