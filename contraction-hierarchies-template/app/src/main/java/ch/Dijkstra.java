@@ -2,6 +2,7 @@ package ch;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
@@ -18,47 +19,52 @@ public class Dijkstra {
 
      * @return A triple containing the duration (in ns), the number of relaxed edges, and the shortest path distance. The distance is -1 if no path exists.
      */
-    public static Result<Integer> shortestPath(Graph g, long from, long to, long skipVertex, int distanceLimit) {
-        long start = System.nanoTime();
-        PriorityQueue<PQElem> pq = new PriorityQueue<>();
-        Set<Long> visited = new HashSet<>();
-        Map<Long, Integer> dists = new HashMap<>();
-        int relaxed = 0;
+    public static Result<Integer> shortestPath(Graph g, long from, long to, long forbidden, int limit) {
+    long start = System.nanoTime();
 
-        pq.add(new PQElem(0, from));
-        dists.put(from, 0);
-        
-        while (!pq.isEmpty()&& pq.peek().v != to) {
-            PQElem elem = pq.poll();
-            long u = elem.v;
-            if (visited.contains(u)) {
-                continue;
-            }
-            int dist = elem.key;
-            if (dist > distanceLimit) break;
-            if (u == skipVertex) continue; 
+    PriorityQueue<PQElem> pq = new PriorityQueue<>();
+    Map<Long, Integer> dist = new HashMap<>();
+    Set<Long> visited = new HashSet<>();
 
-            visited.add(u);
+    pq.add(new PQElem(0, from));
+    dist.put(from, 0);
 
+    int relaxed = 0;
 
-            for (Graph.Edge e : g.getNeighbours(u)) {;
-                // System.out.println("Edge from "+u+" to "+e.to); -> this allows you to see which edges have been relaxed (remember that undirected edges are composed of two directed edges in opposite directions)
+    while (!pq.isEmpty()) {
+        PQElem current = pq.poll();
+        long u = current.v;
+        int d = current.key;
+
+        if (d > limit) break;                  // ✅ stop early
+        if (u == to) break;                    // ✅ stop when reached
+        if (visited.contains(u)) continue;
+
+        visited.add(u);
+
+        List<Graph.Edge> neighbors = g.getNeighbours(u);
+        if (neighbors == null) continue;
+
+        for (Graph.Edge e : neighbors) {
+            if (e.to == forbidden) continue;   // skip forbidden vertex
+
+            int newDist = d + e.weight;
+            if (newDist > limit) continue;     // ✅ prune long paths
+
+            Integer oldDist = dist.get(e.to);
+            if (oldDist == null || newDist < oldDist) {
+                dist.put(e.to, newDist);
+                pq.add(new PQElem(newDist, e.to));
                 relaxed++;
-                long v = e.to;
-                if (v == skipVertex) continue;
-                int w = e.weight;
-                if (!dists.containsKey(v) || dists.get(v) > dist + w) {
-                    pq.add(new PQElem(dist + w, v));
-                    dists.put(v, dist + w);
-                }
             }
         }
-        long end = System.nanoTime();
-        if (!dists.containsKey(to)) {
-            return new Result<>(end - start, relaxed, -1);
-        }
-        return new Result<>(end - start, relaxed, dists.get(to));
     }
+
+    long end = System.nanoTime();
+    int result = dist.getOrDefault(to, -1);
+    return new Result<>(end - start, relaxed, result);
+}
+
 
     /**
      * Overload: shortest path without skipVertex and distanceLimit (uses defaults).

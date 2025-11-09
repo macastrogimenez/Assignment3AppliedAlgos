@@ -97,84 +97,83 @@ public class Graph {
 
     
     public List<Shortcut> contract(long u) {
-        List<Edge> neighbors = this.getNeighbours(u);
-        List<Shortcut> addedShortcuts = new ArrayList<>();
+    List<Edge> neighbors = this.getNeighbours(u);
+    List<Shortcut> addedShortcuts = new ArrayList<>();
 
-        // Handle isolated vertex
-        if (neighbors == null || neighbors.isEmpty()) {
-            this.edges.remove(u);
-            this.vertices.remove(u);
-            return addedShortcuts;
-        }
-
-        // Find max edge weight for early-stop condition
-        int maxWeight = 0;
-        for (Edge e : neighbors) {
-            if (e.weight > maxWeight) {
-                maxWeight = e.weight;
-            }
-        }
-
-    // Try all neighbor pairs (v, w)
-        for (int i = 0; i < neighbors.size(); i++) {
-            Edge vEdge = neighbors.get(i);
-            long v = vEdge.to;
-
-            for (int j = 0; j < neighbors.size(); j++) {
-                Edge wEdge = neighbors.get(j);
-                long w = wEdge.to;
-
-                // Skip self-pair and symmetric duplicate (for undirected)
-                if (v == w || v > w) continue;
-
-                int shortcutWeight = vEdge.weight + wEdge.weight;
-                int distanceLimit = vEdge.weight + maxWeight;
-
-                // run Dijkstra, skipping vertex u
-                Result<Integer> res = Dijkstra.shortestPath(this, v, w, u, distanceLimit);
-                int delta_vw = res.result;
-
-                // Add shortcut if δv(w) > c(v,u) + c(u,w)
-                if (delta_vw == -1 || delta_vw > shortcutWeight) {
-
-                    boolean exists = false;
-                    List<Edge> vNeighbors = this.getNeighbours(v);
-
-                    //checking if the shortcut already exists
-                    if (vNeighbors != null) {
-                        for (Edge e : vNeighbors) {
-                            if (e.to == w && e.weight <= shortcutWeight) {
-                                exists = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!exists) {
-                        this.addUndirectedEdge(v, w, u, shortcutWeight);
-                        addedShortcuts.add(new Shortcut(v, w, u, shortcutWeight));
-                    }
-                }
-            }
-        }
-
-        // Remove vertex u and its incident edges
+    // Handle isolated vertex
+    if (neighbors == null || neighbors.isEmpty()) {
         this.edges.remove(u);
         this.vertices.remove(u);
-
-        for (Map.Entry<Long, List<Edge>> entry : this.edges.entrySet()) {
-            List<Edge> edgeList = entry.getValue();
-            for (int i = 0; i < edgeList.size(); i++) {
-                if (edgeList.get(i).to == u) {
-                    edgeList.remove(i);
-                    i--; // adjust index after removal
-                }
-            }
-        }
-
-        // Return list of added shortcuts
         return addedShortcuts;
     }
+
+    // Find max edge weight for early-stop condition (still used for minor pruning)
+    int maxWeight = 0;
+    for (Edge e : neighbors) {
+        if (e.weight > maxWeight) {
+            maxWeight = e.weight;
+        }
+    }
+
+    // Try all neighbor pairs (v, w)
+    for (int i = 0; i < neighbors.size(); i++) {
+        Edge vEdge = neighbors.get(i);
+        long v = vEdge.to;
+
+        for (int j = 0; j < neighbors.size(); j++) {
+            Edge wEdge = neighbors.get(j);
+            long w = wEdge.to;
+
+            // Skip self-pair and symmetric duplicate (for undirected)
+            if (v == w || v > w) continue;
+
+            int shortcutWeight = vEdge.weight + wEdge.weight;
+
+            // ✅ Early skip if edge already exists and is not longer
+            boolean exists = false;
+            List<Edge> vNeighbors = this.getNeighbours(v);
+            if (vNeighbors != null) {
+                for (Edge e : vNeighbors) {
+                    if (e.to == w && e.weight <= shortcutWeight) {
+                        exists = true;
+                        break;
+                    }
+                }
+            }
+            if (exists) continue; // no need to run Dijkstra
+
+            // ✅ Much tighter distance limit — only explore while path < shortcutWeight
+            int distanceLimit = shortcutWeight;
+
+            // Run Dijkstra, skipping vertex u
+            Result<Integer> res = Dijkstra.shortestPath(this, v, w, u, distanceLimit);
+            int delta_vw = res.result;
+
+            // Add shortcut if δv(w) > c(v,u) + c(u,w)
+            if (delta_vw == -1 || delta_vw > shortcutWeight) {
+                this.addUndirectedEdge(v, w, u, shortcutWeight);
+                addedShortcuts.add(new Shortcut(v, w, u, shortcutWeight));
+            }
+        }
+    }
+
+    // Remove vertex u and its incident edges
+    this.edges.remove(u);
+    this.vertices.remove(u);
+
+    for (Map.Entry<Long, List<Edge>> entry : this.edges.entrySet()) {
+        List<Edge> edgeList = entry.getValue();
+        for (int i = 0; i < edgeList.size(); i++) {
+            if (edgeList.get(i).to == u) {
+                edgeList.remove(i);
+                i--; // adjust index after removal
+            }
+        }
+    }
+
+    return addedShortcuts;
+}
+
 
 
     //It doesnt edit existing graph in any way
