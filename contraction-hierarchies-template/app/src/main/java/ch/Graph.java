@@ -33,6 +33,21 @@ public class Graph {
         }
     }
 
+    // Helper class to store complete shortcut information
+    public static class Shortcut {
+        long from;
+        long to;
+        long contracted;
+        int weight;
+
+        public Shortcut(long from, long to, long contracted, int weight) {
+            this.from = from;
+            this.to = to;
+            this.contracted = contracted;
+            this.weight = weight;
+        }
+    }
+
     private Map<Long, List<Edge>> edges;
     private Map<Long, Vertex> vertices;
     private Map<Long,Integer> ranks;
@@ -81,9 +96,9 @@ public class Graph {
 
 
     
-    public List<Edge> contractAndUpdate(long u) {
+    public List<Shortcut> contract(long u) {
         List<Edge> neighbors = this.getNeighbours(u);
-        List<Edge> addedShortcuts = new ArrayList<>();
+        List<Shortcut> addedShortcuts = new ArrayList<>();
 
         // Handle isolated vertex
         if (neighbors == null || neighbors.isEmpty()) {
@@ -137,7 +152,7 @@ public class Graph {
 
                     if (!exists) {
                         this.addUndirectedEdge(v, w, u, shortcutWeight);
-                        addedShortcuts.add(new Edge(w, shortcutWeight, u));
+                        addedShortcuts.add(new Shortcut(v, w, u, shortcutWeight));
                     }
                 }
             }
@@ -203,7 +218,7 @@ public class Graph {
     }
 
     public PreprocessResult preprocess(int checkInterval){
-        List<Edge> allShortcuts = new ArrayList<>();
+        List<Shortcut> allShortcuts = new ArrayList<>();
         Map<Long, Integer> contractionOrder = new HashMap<>();
 
         Map<Long, Integer> currentKey = new HashMap<>();   // vertex -> key (edge difference)
@@ -291,7 +306,7 @@ public class Graph {
 
             // Key matched: we can now contract v
             // Contract and update graph in-place; contractAndUpdate returns list of added shortcuts
-            List<Edge> newShortcuts = this.contractAndUpdate(v);
+            List<Shortcut> newShortcuts = this.contract(v);
             allShortcuts.addAll(newShortcuts); // collect them
             contractedCount++;
             currentKey.remove(v);
@@ -345,12 +360,13 @@ public class Graph {
         // 1. Copy original graph
         Graph gCopy = this.copyGraph();
 
-        // 2. Run preprocessing on the working graph
+        // 2. Run preprocessing on the working graph (this modifies 'this' graph)
         Graph.PreprocessResult result = this.preprocess(checkInterval);
 
         // 3. Add all shortcuts to the copy
-        for (Edge e : result.allShortcuts) {
-            gCopy.addUndirectedEdge(e.contracted, e.to, e.weight); // use contracted as the "from" for undirected shortcut
+        for (Shortcut s : result.allShortcuts) {
+            // Now we have complete information: from, to, contracted vertex, and weight
+            gCopy.addUndirectedEdge(s.from, s.to, s.contracted, s.weight);
         }
 
         // 4. Copy contraction order (ranks) into gCopy so callers can read them
@@ -361,10 +377,10 @@ public class Graph {
 
 
     public class PreprocessResult {
-        public final List<Edge> allShortcuts;
+        public final List<Shortcut> allShortcuts;
         public final Map<Long, Integer> contractionOrder;
 
-        public PreprocessResult(List<Edge> allShortcuts, Map<Long, Integer> contractionOrder) {
+        public PreprocessResult(List<Shortcut> allShortcuts, Map<Long, Integer> contractionOrder) {
             this.allShortcuts = allShortcuts;
             this.contractionOrder = contractionOrder;
         }
