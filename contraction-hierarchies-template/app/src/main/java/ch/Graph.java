@@ -35,12 +35,14 @@ public class Graph {
 
     private Map<Long, List<Edge>> edges;
     private Map<Long, Vertex> vertices;
+    private Map<Long,Integer> ranks;
 
     public Graph() {
         this.n = 0;
         this.m = 0;
         this.edges = new HashMap<>();
         this.vertices = new HashMap<>();
+        this.ranks = new HashMap<>();
     }
 
     public void addVertex(long id, Vertex v) {
@@ -284,7 +286,7 @@ public class Graph {
                 continue;
             }
 
-            contractionOrder.put(v, rank++);
+            ranks.put(v, rank++);
             System.out.println("Contracting vertex " + v + " (rank " + (rank - 1) + ")");
 
             // Key matched: we can now contract v
@@ -297,13 +299,27 @@ public class Graph {
             // After contraction, many keys changed, but we rely on lazy updates (they will be recomputed when popped)
             // If desired, we could proactively update neighbors, but lazy approach is fine.
         }
-
+        //ranks = contractionOrder;
         long totalNs = System.nanoTime() - startTime;
         System.out.printf("Preprocessing finished. Contracted %d vertices in %.1f s%n", contractedCount, totalNs / 1e9);
-        return new PreprocessResult(allShortcuts, contractionOrder);
+        return new PreprocessResult(allShortcuts, ranks);
 
     }
 
+
+    
+
+    public Map<Long, List<Edge>> getEdges() {
+        return edges;
+    }
+
+    public Map<Long, Vertex> getVertices() {
+        return vertices;
+    }
+
+    public Map<Long, Integer> getRanks() {
+        return ranks;
+    }
 
     public Graph copyGraph() {
         Graph gCopy = new Graph();
@@ -336,6 +352,9 @@ public class Graph {
         for (Edge e : result.allShortcuts) {
             gCopy.addUndirectedEdge(e.contracted, e.to, e.weight); // use contracted as the "from" for undirected shortcut
         }
+
+        // 4. Copy contraction order (ranks) into gCopy so callers can read them
+        gCopy.ranks = new HashMap<>(result.contractionOrder);
 
         return gCopy;
     }
