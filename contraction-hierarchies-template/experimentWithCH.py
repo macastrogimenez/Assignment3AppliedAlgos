@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Experiment script to test Bidirectional Dijkstra on denmark.graph
-Runs 1000 random vertex pairs and records performance metrics.
+Experiment script to compare Contraction Hierarchies with Regular Dijkstra on denmark.graph
+Runs random vertex pairs and records performance metrics.
 """
 
 import subprocess
@@ -14,8 +14,8 @@ from typing import List, Tuple
 GRAPH_FILE = "app/denmark.graph"
 CH_GRAPH_FILE = "app/preprocessedDk"  # Preprocessed graph for CH algorithm
 JAR_PATH = "app/build/libs/app.jar"
-ALGORITHMS = ["D", "BD", "CH"]  # Regular Dijkstra and Bidirectional Dijkstra
-NUM_PAIRS = 5
+ALGORITHMS = ["D", "CH"]  # Regular Dijkstra and Contraction Hierarchies
+NUM_PAIRS = 1000
 RANDOM_SEED = 42
 
 
@@ -175,7 +175,7 @@ def analyze_results(results: List[ExperimentResult]) -> None:
         successful = [r for r in algo_results if r.distance != -1.0]
         failed = [r for r in algo_results if r.distance == -1.0]
         
-        algo_name = "Regular Dijkstra" if algo == "D" else "Bidirectional Dijkstra"
+        algo_name = "Regular Dijkstra" if algo == "D" else "Contraction Hierarchies"
         
         print(f"\n{'='*60}")
         print(f"{algo_name} ({algo})")
@@ -215,26 +215,25 @@ def analyze_results(results: List[ExperimentResult]) -> None:
     print("ALGORITHM COMPARISON")
     print(f"{'='*60}")
     
-    if len(ALGORITHMS) == 2:
-        d_results = [r for r in results_by_algo["D"] if r.distance != -1.0]
-        bd_results = [r for r in results_by_algo["BD"] if r.distance != -1.0]
+    d_results = [r for r in results_by_algo["D"] if r.distance != -1.0]
+    ch_results = [r for r in results_by_algo["CH"] if r.distance != -1.0]
+    
+    if d_results and ch_results:
+        d_avg_time = sum(r.time_ns for r in d_results) / len(d_results)
+        ch_avg_time = sum(r.time_ns for r in ch_results) / len(ch_results)
         
-        if d_results and bd_results:
-            d_avg_time = sum(r.time_ns for r in d_results) / len(d_results)
-            bd_avg_time = sum(r.time_ns for r in bd_results) / len(bd_results)
-            
-            d_avg_relaxed = sum(r.relaxed_edges for r in d_results) / len(d_results)
-            bd_avg_relaxed = sum(r.relaxed_edges for r in bd_results) / len(bd_results)
-            
-            speedup = d_avg_time / bd_avg_time if bd_avg_time > 0 else float('inf')
-            relaxation_reduction = ((d_avg_relaxed - bd_avg_relaxed) / d_avg_relaxed * 100) if d_avg_relaxed > 0 else 0
-            
-            print(f"\nBidirectional Dijkstra vs Regular Dijkstra:")
-            print(f"  Speedup: {speedup:.2f}x faster")
-            print(f"  Relaxation reduction: {relaxation_reduction:.2f}% fewer edges relaxed")
-            print(f"\nDetailed comparison:")
-            print(f"  D  - Avg time: {d_avg_time:.2f} ns, Avg relaxed edges: {d_avg_relaxed:.2f}")
-            print(f"  BD - Avg time: {bd_avg_time:.2f} ns, Avg relaxed edges: {bd_avg_relaxed:.2f}")
+        d_avg_relaxed = sum(r.relaxed_edges for r in d_results) / len(d_results)
+        ch_avg_relaxed = sum(r.relaxed_edges for r in ch_results) / len(ch_results)
+        
+        speedup = d_avg_time / ch_avg_time if ch_avg_time > 0 else float('inf')
+        relaxation_reduction = ((d_avg_relaxed - ch_avg_relaxed) / d_avg_relaxed * 100) if d_avg_relaxed > 0 else 0
+        
+        print(f"\nContraction Hierarchies vs Regular Dijkstra:")
+        print(f"  Speedup: {speedup:.2f}x faster")
+        print(f"  Relaxation reduction: {relaxation_reduction:.2f}% fewer edges relaxed")
+        print(f"\nDetailed comparison:")
+        print(f"  D  - Avg time: {d_avg_time:.2f} ns, Avg relaxed edges: {d_avg_relaxed:.2f}")
+        print(f"  CH - Avg time: {ch_avg_time:.2f} ns, Avg relaxed edges: {ch_avg_relaxed:.2f}")
 
 
 def save_results_to_file(results: List[ExperimentResult], filename: str = "experiment_results.csv") -> None:
