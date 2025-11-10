@@ -26,7 +26,7 @@ public class TestBidirectionalDijkstra {
 
         g.addUndirectedEdge(1, 2, 4);
         g.addUndirectedEdge(2, 3, 1);
-        g.addUndirectedEdge(1, 4, 8);
+        g.addUndirectedEdge(1, 4, 9);
         g.addUndirectedEdge(3, 4, 2);
 
         f = new Graph();
