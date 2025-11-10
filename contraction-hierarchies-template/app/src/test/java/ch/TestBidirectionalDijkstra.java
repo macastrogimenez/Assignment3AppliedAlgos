@@ -7,7 +7,6 @@ import org.junit.Test;
 public class TestBidirectionalDijkstra {
     private Graph g;
     private Graph f;
-    private Graph zeroes;
 
     @Before
     public void setUp() {
@@ -49,17 +48,6 @@ public class TestBidirectionalDijkstra {
         f.addUndirectedEdge(5, 6, 2);
         f.addUndirectedEdge(1, 6, 1);
 
-        zeroes = new Graph();
-        zeroes.addUndirectedEdge(0, 1, 2);
-        zeroes.addUndirectedEdge(1, 2, 0);
-        zeroes.addUndirectedEdge(2, 3, 1);
-        zeroes.addUndirectedEdge(3, 4, 2);
-        zeroes.addUndirectedEdge(4, 5, 0);
-        zeroes.addUndirectedEdge(5, 0, 2);
-        zeroes.addUndirectedEdge(4, 6, 0);
-        zeroes.addUndirectedEdge(6, 2, 0);
-        zeroes.addUndirectedEdge(5, 6, 0);
-        zeroes.addUndirectedEdge(1, 6, 0);
 
         // test input -> result should be 6
 // 7 10

@@ -40,6 +40,40 @@ class Main {
         return g;
     }
 
+    /**
+     * Read a preprocessed CH graph with ranks and shortcuts
+     * Format: vertices have rank as 4th column, edges have contracted vertex as 4th column
+     */
+    private static Graph readCHGraph(Scanner sc) {
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+
+        Graph g = new Graph();
+
+        // Read vertices with ranks
+        for (int i = 0; i < n; i++) {
+            long id = sc.nextLong();
+            float x = Float.parseFloat(sc.next());
+            float y = Float.parseFloat(sc.next());
+            int rank = sc.nextInt();  // Read rank
+            
+            g.addVertex(id, new Graph.Vertex(x, y));
+            g.getRanks().put(id, rank);  // Store rank
+        }
+
+        // Read edges with contracted vertex info
+        for (int i = 0; i < m; i++) {
+            long from = sc.nextLong();
+            long to = sc.nextLong();
+            int weight = sc.nextInt();
+            long contracted = sc.nextLong();  // Read contracted vertex
+            
+            g.addEdge(from, to, contracted, weight);
+        }
+
+        return g;
+    }
+
     public static void main(String[] args) throws Exception {
         String filePath;
         String algorithm;
@@ -87,7 +121,17 @@ class Main {
             System.exit(1);
         }
         Scanner fileScanner = new Scanner(graphFile);
-        var graph = readGraph(fileScanner);
+        
+        // Determine if this is a preprocessed CH graph or regular graph
+        // CH graphs have 4 columns for vertices (id x y rank) and edges (from to weight contracted)
+        Graph graph;
+        if (algorithm.equals("CH")) {
+            // Read as preprocessed CH graph
+            graph = readCHGraph(fileScanner);
+        } else {
+            // Read as regular graph
+            graph = readGraph(fileScanner);
+        }
         fileScanner.close();
         
         runAlgorithm(graph, algorithm, start, target);
@@ -95,16 +139,29 @@ class Main {
     
     private static void runAlgorithm(Graph graph, String algorithm, long start, long target) {
         if(algorithm.equals("BD")){
-            //System.out.println(graph.n + " " + graph.m); //TODO: discuss the purpose of this -> why does it double edges?
             BidirectionalDijkstra d = new BidirectionalDijkstra();
-            Result<Double> result = d.distance(graph, start, target); // Ula values: graph,1,15
+            Result<Double> result = d.distance(graph, start, target);
             System.out.println("Time: "+result.time+", Relaxed edges: "+result.relaxed+", Result: "+result.result);
             ContractionHierachy.storeGraph(graph, "Dk");
         }
         else if (algorithm.equals("D")){
-            // TODO: run the graph with regular dijkstra and return result with time, relaxed edges and result
-            Result<Integer> result = Dijkstra.shortestPath(graph, start, target); // Ula values: graph,1,15
+            Result<Integer> result = Dijkstra.shortestPath(graph, start, target);
             System.out.println("Time: "+result.time+", Relaxed edges: "+result.relaxed+", Result: "+result.result);
+        }
+        else if (algorithm.equals("CH")){
+            // Contraction Hierarchies query
+            ContractionHierachy ch = new ContractionHierachy(graph);
+            Result<Integer> result = ch.query(start, target);
+            System.out.println("Time: "+result.time+", Relaxed edges: "+result.relaxed+", Result: "+result.result);
+        }
+        else if (algorithm.equals("PREPROCESS")){
+            // Preprocess graph and store it
+            System.out.println("Preprocessing graph...");
+            ContractionHierachy.storeGraph(graph, "preprocessed");
+        }
+        else {
+            System.err.println("Unknown algorithm: " + algorithm);
+            System.err.println("Available algorithms: D (Dijkstra), BD (Bidirectional Dijkstra), CH (Contraction Hierarchies), PREPROCESS");
         }
     }
 }
