@@ -8,101 +8,104 @@ import java.util.PriorityQueue;
 public class BidirectionalDijkstra {
     
     public Result<Double> distance(Graph g, long from, long to) {
-        long start = System.nanoTime(); 
-        int relaxed = 0; 
+        long start = System.nanoTime();
+        int relaxed = 0;
 
-        if (from == to) { // if we are checking the distance from a vertex to itself it should be 0
+        if (from == to) {
             long end = System.nanoTime();
             return new Result<>(end - start, relaxed, 0.0);
         }
-        
+
         HashMap<Long, Integer> dLeft = new HashMap<>();
         HashMap<Long, Integer> dRight = new HashMap<>();
         dLeft.put(from, 0);
         dRight.put(to, 0);
-        //maps.add(dLeft);
-        //maps.add(dRight);
-        Long meetingNode = null;
 
-        HashSet<Long> settled = new HashSet<>();
-        double distance = Integer.MAX_VALUE;
+        HashSet<Long> settledLeft = new HashSet<>();
+        HashSet<Long> settledRight = new HashSet<>();
+
         PriorityQueue<PQElem> pqLeft = new PriorityQueue<>();
         PriorityQueue<PQElem> pqRight = new PriorityQueue<>();
         pqLeft.add(new PQElem(0, from));
-        // start the right search from the target
         pqRight.add(new PQElem(0, to));
-        //List<PriorityQueue<PQElem>> queues = new ArrayList<>(2);
-        //queues.add(pqLeft);
-        //queues.add(pqRight);
-        
-        
+
+        double distance = Double.POSITIVE_INFINITY;
+        Long meetingNode = null;
+
         while (!pqLeft.isEmpty() || !pqRight.isEmpty()) {
-            int side = 0; //0 is left 1 is right 
-            long u = 0;
-            // choose the queue with the smaller head; handle empty queues safely
+            int side = 0; // 0 = left, 1 = right
+            PQElem elem;
+
             PQElem leftTop = pqLeft.peek();
             PQElem rightTop = pqRight.peek();
-            PQElem elem = new PQElem(0,0L);
+
+            // pick queue with smaller current distance
             if (leftTop != null && (rightTop == null || leftTop.compareTo(rightTop) <= 0)) {
                 elem = pqLeft.poll();
-                u = elem.v;
+                side = 0;
             } else {
-                side = 1;
                 elem = pqRight.poll();
-                u = elem.v;
+                side = 1;
             }
-            if (settled.contains(u)) {
-                continue;
-            }
-            settled.add(u); 
-            
-            int dist = elem.key; //distance to u 
 
-            try { 
+            long u = elem.v;
+            int dist = elem.key;
+
+            // skip already settled
+            if (side == 0 && settledLeft.contains(u)) continue;
+            if (side == 1 && settledRight.contains(u)) continue;
+
+            // mark as settled
+            if (side == 0) {
+                settledLeft.add(u);
+                if (settledRight.contains(u)) {
+                    meetingNode = u;
+                    distance = dLeft.get(u) + dRight.get(u);
+                    break; // both sides have finalized u
+                }
+            } else {
+                settledRight.add(u);
+                if (settledLeft.contains(u)) {
+                    meetingNode = u;
+                    distance = dLeft.get(u) + dRight.get(u);
+                    break;
+                }
+            }
+
+            // relax neighbors
+            try {
                 for (Graph.Edge e : g.getNeighbours(u)) {
                     int w = e.weight;
-                    Long v = e.to;
+                    long v = e.to;
+
                     if (side == 0) { // left
                         int dv = dLeft.getOrDefault(v, Integer.MAX_VALUE);
                         if ((long) dist + w < dv) {
-                            relaxed++;  // Only count actual relaxations
+                            relaxed++;
                             int newDist = dist + w;
                             dLeft.put(v, newDist);
                             pqLeft.add(new PQElem(newDist, v));
-                            //System.out.println("LEFT: updated "+ v+ " to distance "+ newDist);
                         }
-                    } else {
+                    } else { // right
                         int dv = dRight.getOrDefault(v, Integer.MAX_VALUE);
                         if ((long) dist + w < dv) {
-                            relaxed++;  // Only count actual relaxations
+                            relaxed++;
                             int newDist = dist + w;
                             dRight.put(v, newDist);
                             pqRight.add(new PQElem(newDist, v));
-                            // System.out.println("RIGHT: updated "+ v+ " to distance "+ newDist);
                         }
-                    }
-
-                    int dl = dLeft.getOrDefault(v, Integer.MAX_VALUE);
-                    int dr = dRight.getOrDefault(v, Integer.MAX_VALUE);
-                    if (dl < Integer.MAX_VALUE && dr < Integer.MAX_VALUE) {
-                        distance = Math.min(distance, (double) dl + (double) dr);
-                        meetingNode = v;
-                        break;
                     }
                 }
             } catch (NullPointerException e) {
-                    long end = System.nanoTime(); 
-                    return new Result<>(end - start, relaxed, -1.0);
-                    // get the neighbours of an edge and receives null
-                    // then BD returns -1.0
-            }
-
-            if (meetingNode != null) {
-                break; // now we have an actual connection between sides
+                long end = System.nanoTime();
+                return new Result<>(end - start, relaxed, -1.0);
             }
         }
-        
-        long end = System.nanoTime(); 
-        return new Result<Double>(end - start, relaxed, distance);
+
+        long end = System.nanoTime();
+        if (meetingNode == null) {
+            return new Result<>(end - start, relaxed, -1.0); // disconnected
+        }
+        return new Result<>(end - start, relaxed, distance);
     }   
 }
