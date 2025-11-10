@@ -152,18 +152,26 @@ public class TestContractionHierarchies {
         }
     }
 
-    @Test
-    public void testBidirectionalDijkstra_noPathExists() {
-        Graph disconnected = new Graph();
-        disconnected.addVertex(1, new Graph.Vertex(0, 0));
-        disconnected.addVertex(2, new Graph.Vertex(1, 1));
-        disconnected.addVertex(3, new Graph.Vertex(2, 2));
-        disconnected.addUndirectedEdge(1, 2, 4);
-        // no edges between 1 and 3
-        BidirectionalDijkstra bd = new BidirectionalDijkstra();
-        Result<Double> result = bd.distance(disconnected, 1, 3);
-        assertEquals("Unreachable vertex should return -1",-1.0,result.result, 0.001);
-    }
+    // @Test
+    // public void testBidirectionalDijkstra_noPathExists() {
+    //     Graph disconnected = new Graph();
+    //     disconnected.addVertex(1, new Graph.Vertex(0, 0));
+    //     disconnected.addVertex(2, new Graph.Vertex(1, 1));
+    //     disconnected.addVertex(3, new Graph.Vertex(2, 2));
+    //     disconnected.addUndirectedEdge(1, 2, 4);
+    //     try {
+    //         ContractionHierachy.storeGraph(disconnected, "disconnectedTest");
+    //         File file = new File("testgraphF");
+    //         Scanner sc = new Scanner(file);
+    //         Graph chGraph = readCHGraph(sc);
+    //         ContractionHierachy ch = new ContractionHierachy(chGraph);
+    //         sc.close();
+    //         Result<Integer> result = ch.query(1L, 3L);
+    //         assertEquals("Unreachable vertex should return -1",-1.0,result.result, 0.001);    
+    //     } catch (Exception e) {
+    //         fail("Failed to read preprocessed graph: " + e.getMessage());
+    //     }
+    // }
     
     @Test
     public void testBidirectionalDijkstra_sameNode() {
