@@ -142,7 +142,7 @@ class Main {
             BidirectionalDijkstra d = new BidirectionalDijkstra();
             Result<Double> result = d.distance(graph, start, target);
             System.out.println("Time: "+result.time+", Relaxed edges: "+result.relaxed+", Result: "+result.result);
-            ContractionHierachy.storeGraph(graph, "Dk");
+            //ContractionHierachy.storeGraph(graph, "Dk");
         }
         else if (algorithm.equals("D")){
             Result<Integer> result = Dijkstra.shortestPath(graph, start, target);
