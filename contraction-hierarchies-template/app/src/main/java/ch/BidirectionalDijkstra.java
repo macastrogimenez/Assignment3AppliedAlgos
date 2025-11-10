@@ -20,26 +20,20 @@ public class BidirectionalDijkstra {
         HashMap<Long, Integer> dRight = new HashMap<>();
         dLeft.put(from, 0);
         dRight.put(to, 0);
-        //maps.add(dLeft);
-        //maps.add(dRight);
         Long meetingNode = null;
 
         HashSet<Long> settled = new HashSet<>();
         double distance = Integer.MAX_VALUE;
         PriorityQueue<PQElem> pqLeft = new PriorityQueue<>();
         PriorityQueue<PQElem> pqRight = new PriorityQueue<>();
+        // start left and right search from 'from' and 'to'
         pqLeft.add(new PQElem(0, from));
-        // start the right search from the target
         pqRight.add(new PQElem(0, to));
-        //List<PriorityQueue<PQElem>> queues = new ArrayList<>(2);
-        //queues.add(pqLeft);
-        //queues.add(pqRight);
-        
         
         while (!pqLeft.isEmpty() || !pqRight.isEmpty()) {
             int side = 0; //0 is left 1 is right 
             long u = 0;
-            // choose the queue with the smaller head; handle empty queues safely
+            // choose the queue with the smaller head to handle empty queues safely
             PQElem leftTop = pqLeft.peek();
             PQElem rightTop = pqRight.peek();
             PQElem elem = new PQElem(0,0L);
@@ -51,6 +45,8 @@ public class BidirectionalDijkstra {
                 elem = pqRight.poll();
                 u = elem.v;
             }
+
+            //we skip the vertices that have already been settled
             if (settled.contains(u)) {
                 continue;
             }
@@ -72,7 +68,7 @@ public class BidirectionalDijkstra {
                             pqLeft.add(new PQElem(newDist, v));
                             //System.out.println("LEFT: updated "+ v+ " to distance "+ newDist);
                         }
-                    } else {
+                    } else { // right
                         int dv = dRight.getOrDefault(v, Integer.MAX_VALUE);
                         if ((long) dist + w < dv) {
                             relaxed++;  // Only count actual relaxations
@@ -85,6 +81,7 @@ public class BidirectionalDijkstra {
 
                     int dl = dLeft.getOrDefault(v, Integer.MAX_VALUE);
                     int dr = dRight.getOrDefault(v, Integer.MAX_VALUE);
+                    //break when vertice occured in both maps
                     if (dl < Integer.MAX_VALUE && dr < Integer.MAX_VALUE) {
                         distance = Math.min(distance, (double) dl + (double) dr);
                         meetingNode = v;
@@ -99,7 +96,7 @@ public class BidirectionalDijkstra {
             }
 
             if (meetingNode != null) {
-                break; // now we have an actual connection between sides
+                break; // now we have a connection between sides
             }
         }
         

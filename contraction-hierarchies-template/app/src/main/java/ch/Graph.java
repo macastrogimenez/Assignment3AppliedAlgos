@@ -97,86 +97,86 @@ public class Graph {
 
     
     public List<Shortcut> contract(long u) {
-    List<Edge> neighbors = this.getNeighbours(u);
-    List<Shortcut> addedShortcuts = new ArrayList<>();
+        List<Edge> neighbors = this.getNeighbours(u);
+        List<Shortcut> addedShortcuts = new ArrayList<>();
 
-    // Handle isolated vertex
-    if (neighbors == null || neighbors.isEmpty()) {
+        // Handle isolated vertex
+        if (neighbors == null || neighbors.isEmpty()) {
+            this.edges.remove(u);
+            this.vertices.remove(u);
+            return addedShortcuts;
+        }
+
+        // Find max edge weight for early-stop condition ( used for minor pruning)
+        int maxWeight = 0;
+        for (Edge e : neighbors) {
+            if (e.weight > maxWeight) {
+                maxWeight = e.weight;
+            }
+        }
+
+        // Try all neighbor pairs (v, w)
+        for (int i = 0; i < neighbors.size(); i++) {
+            Edge vEdge = neighbors.get(i);
+            long v = vEdge.to;
+
+            for (int j = 0; j < neighbors.size(); j++) {
+                Edge wEdge = neighbors.get(j);
+                long w = wEdge.to;
+
+                // Skip self-pair and symmetric duplicate
+                if (v == w || v > w) continue;
+
+                int shortcutWeight = vEdge.weight + wEdge.weight;
+
+                // Early skip if edge already exists and is not longer
+                boolean exists = false;
+                List<Edge> vNeighbors = this.getNeighbours(v);
+                if (vNeighbors != null) {
+                    for (Edge e : vNeighbors) {
+                        if (e.to == w && e.weight <= shortcutWeight) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                }
+                if (exists) continue; // no need to run Dijkstra
+
+                // distance limit
+                int distanceLimit = shortcutWeight;
+
+                // Run Dijkstra, skipping vertex u
+                Result<Integer> res = Dijkstra.shortestPath(this, v, w, u, distanceLimit);
+                int delta_vw = res.result;
+
+                // Add shortcut if δv(w) > c(v,u) + c(u,w)
+                if (delta_vw == -1 || delta_vw > shortcutWeight) {
+                    this.addUndirectedEdge(v, w, u, shortcutWeight);
+                    addedShortcuts.add(new Shortcut(v, w, u, shortcutWeight));
+                }
+            }
+        }
+
+        // Remove vertex u and its incident edges
         this.edges.remove(u);
         this.vertices.remove(u);
+
+        for (Map.Entry<Long, List<Edge>> entry : this.edges.entrySet()) {
+            List<Edge> edgeList = entry.getValue();
+            for (int i = 0; i < edgeList.size(); i++) {
+                if (edgeList.get(i).to == u) {
+                    edgeList.remove(i);
+                    i--; // adjust index after removal
+                }
+            }
+        }
+
         return addedShortcuts;
     }
 
-    // Find max edge weight for early-stop condition (still used for minor pruning)
-    int maxWeight = 0;
-    for (Edge e : neighbors) {
-        if (e.weight > maxWeight) {
-            maxWeight = e.weight;
-        }
-    }
-
-    // Try all neighbor pairs (v, w)
-    for (int i = 0; i < neighbors.size(); i++) {
-        Edge vEdge = neighbors.get(i);
-        long v = vEdge.to;
-
-        for (int j = 0; j < neighbors.size(); j++) {
-            Edge wEdge = neighbors.get(j);
-            long w = wEdge.to;
-
-            // Skip self-pair and symmetric duplicate (for undirected)
-            if (v == w || v > w) continue;
-
-            int shortcutWeight = vEdge.weight + wEdge.weight;
-
-            // ✅ Early skip if edge already exists and is not longer
-            boolean exists = false;
-            List<Edge> vNeighbors = this.getNeighbours(v);
-            if (vNeighbors != null) {
-                for (Edge e : vNeighbors) {
-                    if (e.to == w && e.weight <= shortcutWeight) {
-                        exists = true;
-                        break;
-                    }
-                }
-            }
-            if (exists) continue; // no need to run Dijkstra
-
-            // ✅ Much tighter distance limit — only explore while path < shortcutWeight
-            int distanceLimit = shortcutWeight;
-
-            // Run Dijkstra, skipping vertex u
-            Result<Integer> res = Dijkstra.shortestPath(this, v, w, u, distanceLimit);
-            int delta_vw = res.result;
-
-            // Add shortcut if δv(w) > c(v,u) + c(u,w)
-            if (delta_vw == -1 || delta_vw > shortcutWeight) {
-                this.addUndirectedEdge(v, w, u, shortcutWeight);
-                addedShortcuts.add(new Shortcut(v, w, u, shortcutWeight));
-            }
-        }
-    }
-
-    // Remove vertex u and its incident edges
-    this.edges.remove(u);
-    this.vertices.remove(u);
-
-    for (Map.Entry<Long, List<Edge>> entry : this.edges.entrySet()) {
-        List<Edge> edgeList = entry.getValue();
-        for (int i = 0; i < edgeList.size(); i++) {
-            if (edgeList.get(i).to == u) {
-                edgeList.remove(i);
-                i--; // adjust index after removal
-            }
-        }
-    }
-
-    return addedShortcuts;
-}
 
 
-
-    //It doesnt edit existing graph in any way
+    // doesnt edit existing graph in any way
     public int getEdgeDifference(long v) {
 
 
@@ -202,12 +202,10 @@ public class Graph {
                 int uwShortcutWeight = uEdge.weight + wEdge.weight;
                 int distanceLimit = uEdge.weight + maxWeight;
 
-                // Run local Dijkstra *excluding vertex u* 
+                // Run local Dijkstra excluding vertex u 
                 Result<Integer> result = Dijkstra.shortestPath(this, u, w, v, distanceLimit);
 
                 if (result.result > uwShortcutWeight || result.result == -1){
-                // Add shortcut edge (v, w)
-                    //this.addUndirectedEdge(u, w, v, uwShortcutWeight);
                     addedShortcuts++;
                 }
             }
@@ -218,7 +216,6 @@ public class Graph {
 
     public PreprocessResult preprocess(int checkInterval){
         List<Shortcut> allShortcuts = new ArrayList<>();
-        //Map<Long, Integer> contractionOrder = new HashMap<>();
 
         Map<Long, Integer> currentKey = new HashMap<>();   // vertex -> key (edge difference)
         PriorityQueue<PQElem> pq = new PriorityQueue<>();
@@ -243,7 +240,6 @@ public class Graph {
 
         int lazyUpdates = 0;
         int rank = 0;        // number of successful lazy updates in current interval
-        //int attemptsSinceCheck = 0; // attempts since last check
         long contractedCount = 0;
         long startTime = System.nanoTime();
 
@@ -263,8 +259,6 @@ public class Graph {
                 pq.add(new PQElem(recomputedKey, v));
 
                 lazyUpdates++;
-                //attemptsSinceCheck++;
-                
 
                 // Debug
                 if (lazyUpdates % 100 == 0) {
@@ -272,7 +266,6 @@ public class Graph {
                 }
 
                 // Check whether to trigger full refresh
-                //if (attemptsSinceCheck >= checkInterval) {
                     if (lazyUpdates > checkInterval) {
                         // Perform full re-evaluation of all remaining vertices
                         System.out.println("  High lazy update rate detected (" + lazyUpdates + "/" +  "). Doing full priority refresh...");
@@ -293,9 +286,6 @@ public class Graph {
                         // reset counters
                         lazyUpdates = 0;
                     }
-                    // reset attempts counter regardless
-                    //attemptsSinceCheck = 0;
-                //}
 
                 // continue to next iteration (don't contract this vertex yet)
                 continue;
@@ -318,7 +308,6 @@ public class Graph {
             // After contraction, many keys changed, but we rely on lazy updates (they will be recomputed when popped)
             // If desired, we could proactively update neighbors, but lazy approach is fine.
         }
-        //ranks = contractionOrder;
         long totalNs = System.nanoTime() - startTime;
         System.out.printf("Preprocessing finished. Contracted %d vertices in %.1f s%n", contractedCount, totalNs / 1e9);
         return new PreprocessResult(allShortcuts, ranks);
@@ -361,19 +350,19 @@ public class Graph {
 
 
     public Graph AugmentedGraph(int checkInterval) {
-        // 1. Copy original graph
+        // Copy original graph
         Graph gCopy = this.copyGraph();
 
-        // 2. Run preprocessing on the working graph (this modifies 'this' graph)
+        // Run preprocessing on the working graph (this modifies 'this' graph)
         Graph.PreprocessResult result = this.preprocess(checkInterval);
 
-        // 3. Add all shortcuts to the copy
+        // Add all shortcuts to the copy
         for (Shortcut s : result.allShortcuts) {
             // Now we have complete information: from, to, contracted vertex, and weight
             gCopy.addUndirectedEdge(s.from, s.to, s.contracted, s.weight);
         }
 
-        // 4. Copy contraction order (ranks) into gCopy so callers can read them
+        // Copy contraction order (ranks) into gCopy so callers can read them
         gCopy.ranks = new HashMap<>(result.contractionOrder);
 
         return gCopy;

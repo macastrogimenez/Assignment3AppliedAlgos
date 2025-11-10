@@ -36,8 +36,8 @@ public class Dijkstra {
         long u = current.v;
         int d = current.key;
 
-        if (d > limit) break;                  // ✅ stop early
-        if (u == to) break;                    // ✅ stop when reached
+        if (d > limit) break;                  // stop early
+        if (u == to) break;                    // stop when reached
         if (visited.contains(u)) continue;
 
         visited.add(u);
@@ -49,7 +49,7 @@ public class Dijkstra {
             if (e.to == forbidden) continue;   // skip forbidden vertex
 
             int newDist = d + e.weight;
-            if (newDist > limit) continue;     // ✅ prune long paths
+            if (newDist > limit) continue;     // prune long paths
 
             Integer oldDist = dist.get(e.to);
             if (oldDist == null || newDist < oldDist) {
