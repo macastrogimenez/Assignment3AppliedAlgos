@@ -77,15 +77,15 @@ class Main {
     public static void main(String[] args) throws Exception {
         String filePath;
         String algorithm;
-        long start, target;  // Changed from int to long
+        long start, target;  
         
         // Check if file path is provided as command line argument
         if (args.length >= 4) {
             // Read from command line arguments: <file> <algorithm> <start> <target>
             filePath = args[0];
             algorithm = args[1];
-            start = Long.parseLong(args[2]);  // Changed from Integer.parseInt
-            target = Long.parseLong(args[3]); // Changed from Integer.parseInt
+            start = Long.parseLong(args[2]);  
+            target = Long.parseLong(args[3]); 
         } else {
             // Fall back to reading from stdin
             Scanner sc = new Scanner(System.in);
@@ -104,8 +104,8 @@ class Main {
             fileScanner.close();
 
             algorithm = sc.nextLine();
-            start = sc.nextLong();  // Changed from nextInt()
-            target = sc.nextLong(); // Changed from nextInt()
+            start = sc.nextLong();  
+            target = sc.nextLong(); 
             sc.close();
             
             runAlgorithm(graph, algorithm, start, target);

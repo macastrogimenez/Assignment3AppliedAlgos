@@ -34,16 +34,16 @@ public class ContractionHierachy {
             return new Result<Integer>((int)(endTime - startTime), 0, 0);
         }
         
-        // Line 1: d↑:= (∞,...,∞); d↓:= (∞,...,∞); d:= ∞;
+        //d↑:= (∞,...,∞); d↓:= (∞,...,∞); d:= ∞;
         HashMap<Long, Integer> dUp = new HashMap<>();     // d↑ - forward distances
         HashMap<Long, Integer> dDown = new HashMap<>();   // d↓ - backward distances
         int d = Integer.MAX_VALUE;                        // best distance found
         
-        // Line 2: d↑[s]:= 0; d↓[t]:= 0;
+        //d↑[s]:= 0; d↓[t]:= 0;
         dUp.put(s, 0);
         dDown.put(t, 0);
         
-        // Line 3: Q↑ = {(0,s)}; Q↓ = {(0,t)}; r:= ↑;
+        // Q↑ = {(0,s)}; Q↓ = {(0,t)}; r:= ↑;
         PriorityQueue<PQElem> qUp = new PriorityQueue<>();
         PriorityQueue<PQElem> qDown = new PriorityQueue<>();
         qUp.add(new PQElem(0, s));
@@ -54,7 +54,7 @@ public class ContractionHierachy {
         } catch (Exception e) {
             // TODO: handle exception
         }
-        // Line 4: while (Q↑ ≠ ∅ or Q↓ ≠ ∅) and (d > min {min Q↑, min Q↓}) do
+        //while (Q↑ ≠ ∅ or Q↓ ≠ ∅) and (d > min {min Q↑, min Q↓}) do
         while ((!qUp.isEmpty() || !qDown.isEmpty())) {
             // Check termination condition
             int minUp = qUp.isEmpty() ? Integer.MAX_VALUE : qUp.peek().key;
@@ -65,7 +65,7 @@ public class ContractionHierachy {
                 break;
             }
             
-            // Line 5: if Q¬r ≠ ∅ then r:= ¬r;  // interleave direction
+            // if Q¬r ≠ ∅ then r:= ¬r;  // interleave direction
             PriorityQueue<PQElem> qCurrent;
             HashMap<Long, Integer> dCurrent;
             
@@ -96,7 +96,7 @@ public class ContractionHierachy {
                 continue;
             }
             
-            // Line 6: (·,u):= Qr.deleteMin();  // settle u
+            // (·,u):= Qr.deleteMin();  // settle u
             PQElem elem = qCurrent.poll();
             long u = elem.v;
             int distU = elem.key;
@@ -106,14 +106,14 @@ public class ContractionHierachy {
                 continue;
             }
             
-            // Line 7: d:= min {d, d↑[u] + d↓[u]};  // u is potential candidate
+            // d:= min {d, d↑[u] + d↓[u]};  // u is potential candidate
             int duUp = dUp.getOrDefault(u, Integer.MAX_VALUE);
             int duDown = dDown.getOrDefault(u, Integer.MAX_VALUE);
             if (duUp != Integer.MAX_VALUE && duDown != Integer.MAX_VALUE) {
                 d = Math.min(d, duUp + duDown);
             }
             
-            // Line 8: foreach e = (u,v) ∈ E* do  // relax edges
+            // foreach e = (u,v) ∈ E* do  // relax edges
             List<Graph.Edge> neighbors = graph.getNeighbours(u);
             if (neighbors == null) continue;
             
@@ -121,7 +121,7 @@ public class ContractionHierachy {
                 long v = e.to;
                 int weight = e.weight;
                 
-                // Line 9: if r(e) and (dr[u] + c(e) < dr[v]) then  // shorter path found
+                // if r(e) and (dr[u] + c(e) < dr[v]) then  // shorter path found
                 // r(e) means: use only upward edges in the hierarchy
                 boolean isUpwardEdge = isUpward(u, v);
                 
@@ -132,10 +132,10 @@ public class ContractionHierachy {
                         int oldDist = dCurrent.getOrDefault(v, Integer.MAX_VALUE);
                         
                         if (newDist < oldDist) {
-                            // Line 10: dr[v]:= dr[u] + c(e);  // update tentative distance
+                            // dr[v]:= dr[u] + c(e);  // update tentative distance
                             dCurrent.put(v, newDist);
                             
-                            // Line 11: Qr.update(dr[v],v);  // update priority queue
+                            // Qr.update(dr[v],v);  // update priority queue
                             qCurrent.add(new PQElem(newDist, v));
                             relaxedEdges++;
                         }
@@ -164,7 +164,7 @@ public class ContractionHierachy {
             }
         }
         
-        // Line 12: return d;
+        // return d;
         long endTime = System.nanoTime();
         int finalDist = (d == Integer.MAX_VALUE) ? -1 : d;
         return new Result<Integer>((int)(endTime - startTime), relaxedEdges, finalDist);
