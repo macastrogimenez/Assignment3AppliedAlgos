@@ -49,11 +49,7 @@ public class ContractionHierachy {
         qUp.add(new PQElem(0, s));
         qDown.add(new PQElem(0, t));
         boolean directionUp = true;  // r := ↑ (true = up, false = down)
-        try {
-            
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
+        
         //while (Q↑ ≠ ∅ or Q↓ ≠ ∅) and (d > min {min Q↑, min Q↓}) do
         while ((!qUp.isEmpty() || !qDown.isEmpty())) {
             // Check termination condition
