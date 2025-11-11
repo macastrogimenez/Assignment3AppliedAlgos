@@ -44,7 +44,8 @@ public class App {
         param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
         param.setCompressionQuality(0.5f); // Adjust the quality parameter as needed
 
-        new File(path).mkdir();
+        //new File(path).mkdir();
+        new File(path).getParentFile().mkdirs();  // Create parent directories only
 
         File fOutputFile = new File(path);
         ImageOutputStream ios = ImageIO.createImageOutputStream(fOutputFile);
