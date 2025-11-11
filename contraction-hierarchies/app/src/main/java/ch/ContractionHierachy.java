@@ -229,3 +229,15 @@ public class ContractionHierachy {
         }
     }
 }
+
+// ## Implementation Notes
+
+// 1. **r(e) condition**: In the pseudocode, `r(e)` means "edge e is valid for direction r"
+//    - Backward: also upward edges (graph structure is already bidirectional)
+//    - Forward: only upward edges (`rank[v] > rank[u]`)
+
+// 2. **Direction interleaving**: Line 5 switches direction when the opposite queue is non-empty
+
+// 3. **Meeting point detection**: Updates best distance whenever both searches reach the same vertex
+
+// 4. **Termination**: When sum of minimum queue priorities exceeds best distance found

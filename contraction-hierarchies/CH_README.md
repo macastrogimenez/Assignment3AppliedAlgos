@@ -11,6 +11,7 @@ gradle run --args="<input-graph> PREPROCESS 0 0"
 ```
 
 This creates a file `preprocessed` with:
+
 - Vertex ranks
 - Original edges + shortcut edges
 - Contracted vertex information
@@ -22,6 +23,7 @@ gradle run --args="<preprocessed-graph> CH <source> <target>"
 ```
 
 Example:
+
 ```
 bash
 gradle run --args="firstTry CH 2501940512 1094730049"
@@ -30,11 +32,13 @@ gradle run --args="firstTry CH 2501940512 1094730049"
 ### 3. Compare with other algorithms
 
 **Regular Dijkstra:**
+
 ```bash
 gradle run --args="denmark.graph D <source> <target>"
 ```
 
 **Bidirectional Dijkstra:**
+
 ```bash
 gradle run --args="denmark.graph BD <source> <target>"
 ```
@@ -53,11 +57,13 @@ The CH query algorithm (Algorithm 1) uses:
 ## Key Components
 
 ### `ContractionHierachy.java`
+
 - `query(s, t)`: Main CH query algorithm
 - `isUpward(u, v)`: Checks if edge (u,v) is upward in hierarchy
 - `storeGraph()`: Saves preprocessed graph with ranks and shortcuts
 
 ### `Graph.java`
+
 - `preprocess()`: Contracts vertices and creates shortcuts
 - `contractAndUpdate()`: Contracts a single vertex
 - `getEdgeDifference()`: Priority heuristic for contraction order
@@ -66,6 +72,7 @@ The CH query algorithm (Algorithm 1) uses:
 ### File Formats
 
 **Regular graph (3 columns per vertex, 3 per edge):**
+
 ```
 <n> <m>
 <vertex_id> <x> <y>
@@ -75,6 +82,7 @@ The CH query algorithm (Algorithm 1) uses:
 ```
 
 **Preprocessed CH graph (4 columns):**
+
 ```
 <n> <m>
 <vertex_id> <x> <y> <rank>
@@ -86,19 +94,9 @@ The CH query algorithm (Algorithm 1) uses:
 ## Performance
 
 Contraction Hierarchies provides significant speedup:
+
 - **BD**: ~2000 relaxed edges
-- **CH**: ~150 relaxed edges (13x fewer!)
+- **CH**: ~150 relaxed edges (10x fewer!)
 
 This speedup comes from preprocessing that creates shortcuts, allowing queries to only explore the "highway" (high-rank) portion of the graph.
 
-## Implementation Notes
-
-1. **r(e) condition**: In the pseudocode, `r(e)` means "edge e is valid for direction r"
-   - Forward: only upward edges (`rank[v] > rank[u]`)
-   - Backward: also upward edges (graph structure is already bidirectional)
-
-2. **Direction interleaving**: Line 5 switches direction when the opposite queue is non-empty
-
-3. **Meeting point detection**: Updates best distance whenever both searches reach the same vertex
-
-4. **Termination**: When sum of minimum queue priorities exceeds best distance found
