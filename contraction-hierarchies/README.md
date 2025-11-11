@@ -19,9 +19,7 @@ java -jar app/build/libs/app.jar < test.graph
 
 ## Code structure
 
-We have implemented basic functionality such as graph reading, a graph data structure using HashMaps, and a basic Dijkstra implementation that keeps track of visited vertices using HashSets.  Basic unit tests for the Dijkstra implementation are available as well.
-
-To solve the assignment, you probably need to update the API by changing method signatures to incorporate additional functionality.
+The implementation follows a modular architecture with three main algorithm classes (`Dijkstra`, `BidirectionalDijkstra`, `ContractionHierachy`) built on a shared `Graph` data structure that manages vertices, edges, ranks, and shortcuts. The workflow separates preprocessing (node contraction with shortcut creation in `Graph.java`) from query execution (bidirectional hierarchical search in `ContractionHierachy.java`), with preprocessed graphs stored as files for reuse across multiple queries. Evaluation infrastructure includes Python scripts for automated experimentation (`experimentWithCH.py`) and visualization (`plot_ch_vs_d.py`), generating performance comparisons on 1000 random vertex pairs from the Denmark road network dataset. The project maintains clean separation of concerns with dedicated test suites, comprehensive documentation, and a command-line interface (`Main.java`) supporting multiple algorithm modes (D, BD, CH, PREPROCESS) for flexible experimentation and validation.
 
 ## Preprocess a graph (create CH with shortcuts)
 
