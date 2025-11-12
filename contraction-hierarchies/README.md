@@ -42,6 +42,8 @@ This creates a file `preprocessed` with:
 gradle run --args="app/denmark.graph BD 1096800199 1124791586" # for Bidirectional Dijkstra
 gradle run --args="app/denmark.graph D 115739 115775" # for Dijkstra
 gradle run --args="app/preprocessedDk CH 115739 115775" # for Contraction Hierarchies
+gradle run --args="app/denmark.graph PREPROCESS 0 0" # for Pre-processing
+
 
 # Or
 gradle run --args="test.graph BD 0 3" # for Bidirectional Dijkstra
@@ -65,3 +67,36 @@ java -jar app/build/libs/app.jar denmark.graph BD 0 100
 # Run with regular Dijkstra
 java -jar app/build/libs/app.jar denmark.graph D 0 100
 ```
+
+## Experiments
+
+- `experiment.py` experiment with 1000 vertex pairs on Dijkstra and Bidirectional Dijkstra.
+- `experimentWithCH.py` experiment with 1000 vertex pairs on Dijkstra and Contraction Hierarchies.
+
+Both experiments compare performance between algorithms (speedup, relaxation reduction) and saves detailed results to CSV file.
+
+### Requirements
+
+- Python 3.6+
+- Java JDK (to run the JAR)
+- Built JAR file at `app/build/libs/app.jar`
+
+### Usage
+
+#### 1. Build the JAR first
+
+```bash
+gradle jar
+```
+
+#### 2. Run the experiment
+
+```bash
+python3 experiment.py
+python3 experimentWithCH.py
+```
+
+### Troubleshooting
+
+**Graph file not found:**
+Make sure `denmark.graph` and `preprocessedDk` are in app the directory.
