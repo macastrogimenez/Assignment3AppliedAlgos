@@ -1,7 +1,0 @@
-denmark.graph
-**/*.class
-.gradle
-**/build
-ch.graph
-denmark.contracted.graph
-.DS_Store
